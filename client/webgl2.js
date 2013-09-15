@@ -505,33 +505,31 @@ var Boid = function() {
         var sprite1,uniforms=null;
         var sprite2=null;
         var myPos = { 'x':2,'y':4,'z':5};
-
-var posX= new Array();
-var posY= new Array();
         var sphere = null;
     
         init();
         animate();
 
 function loadtrees(loader,branchfactor,levels,leafsprite,iduni,idxstart,idxend,amplitude,previousRender,attributes,displacement,seed,segments,vMultiplier,twigScale,initalBranchLength,lengthFalloffFactor,lengthFalloffPower,clumpMax,clumpMin){
+
+
 url = 'http://localhost:8080/tree?leaves=0&levels='+levels+'&branchfactor='+branchfactor
 if (seed != undefined)
 url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale='+twigScale
 //+'&initalBranchLength='+initalBranchLength+'&lengthFalloffFactor='+lengthFalloffFactor+'&lengthFalloffPower='+lengthFalloffPower+'&clumpMax='+clumpMax+'&clumpMin='+clumpMin
 
-loader.load( url, function ( geometry, materials ) {
+
+c = loader.load( url, function ( geometry, materials ) {
 
 
                 var material = materials[ 0 ];
                 material.color.setHex( 0xffffff );
                 material.ambient.setHex( 0xffffff );
-
                 var faceMaterial = new THREE.MeshFaceMaterial( materials );
 
                 for ( var i = idxstart; i < idxend; i ++ ) {
-
-                    var x = posX[i];
-                    var z = posY[i];
+                    var x = naturePos[0][i];
+                    var z = naturePos[1][i];
 
                     morph = new THREE.Mesh( geometry, faceMaterial );
 
@@ -569,8 +567,8 @@ url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale
 
                 for ( var i = idxstart; i < idxend; i ++ ) {
 
-                    var x = posX[i];
-                    var z = posY[i];
+                    var x = naturePos[0][i];
+                    var z = naturePos[1][i];
 
                     Shaders = {
                         LitAttributeAnimated: {
@@ -654,6 +652,14 @@ url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale
             } );
 }
 
+function funcdt() {     
+            var loader = new THREE.JSONLoader();
+            loadtrees(loader,3.4,5,'sprite1',1,0,49,"amplitude","previousRender",attributesS6,"displacement"   );
+            //loadtrees(loader,6,20,'sprite2',2,50,99,"amplitude2","previousRender2",attributesS7,"displacement2");
+            //loadtrees(loader,7,10,'sprite2',2,100,199,"amplitude2","previousRender2",attributesS7,"displacement2",267,8,0.6,0.7,0.26,0.94,0.7,0.556,0.404);
+            //loadtrees(loader,5,30,'sprite2',2,200,399,"amplitude2","previousRender2",attributesS7,"displacement2",300,4,0.3,0.7,0.26,0.9,0.3,0.15,0.404);
+            //loadtrees(loader,8,60,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2",540,10,0.9,0.7,0.2,0.4,0.7,0.556,0.404);
+}
         function init() {
 
             sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
@@ -662,7 +668,7 @@ url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale
             container = document.createElement( 'div' );
             document.body.appendChild( container );
 
-            camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
+   camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
 
             camera.position.set( myPos.x,myPos.y,myPos.z);
             camera.uniforms=new Array();
@@ -741,14 +747,13 @@ sphere = new THREE.Mesh(
 scene.add(sphere);
 
 
-            var loader = new THREE.JSONLoader();
-            for ( var i = 0; i <500; i ++ ) {
+/*            for ( var i = 0; i <500; i ++ ) {
 
                 // random placement in a grid
 
                 posX[i] = THREE.Math.randFloatSpread( 256 );
                 posY[i] = THREE.Math.randFloatSpread( 256 );
-            }
+            }*/
 
             var waterWidth = 1024, waterDepth = 1024;
             var worldWidth = 512, worldDepth = 512,
@@ -783,11 +788,9 @@ scene.add(sphere);
                                                                             "map": floorTexture
                                                                             }));
             scene.add( ground );
-            loadtrees(loader,3.4,5,'sprite1',1,0,49,"amplitude","previousRender",attributesS6,"displacement"   );
-            //loadtrees(loader,6,20,'sprite2',2,50,99,"amplitude2","previousRender2",attributesS7,"displacement2");
-            //loadtrees(loader,7,10,'sprite2',2,100,199,"amplitude2","previousRender2",attributesS7,"displacement2",267,8,0.6,0.7,0.26,0.94,0.7,0.556,0.404);
-            //loadtrees(loader,5,30,'sprite2',2,200,399,"amplitude2","previousRender2",attributesS7,"displacement2",300,4,0.3,0.7,0.26,0.9,0.3,0.15,0.404);
-            //loadtrees(loader,8,60,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2",540,10,0.9,0.7,0.2,0.4,0.7,0.556,0.404);
+
+            setTimeout(funcdt, 1000);
+
 /*
             loader.load( 'http://localhost:8080/tree?leaves=0', function ( geometry, materials ) {
 
