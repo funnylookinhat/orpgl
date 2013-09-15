@@ -757,8 +757,9 @@ scene.add(sphere);
 
             var waterWidth = 1024, waterDepth = 1024;
             var worldWidth = 512, worldDepth = 512,
-            data = generateHeight( worldWidth, worldDepth );
-            data2 = generateHeight( waterWidth, waterDepth );
+            data = groundGeometry;
+
+            //data2 = generateHeight( waterWidth, waterDepth );
 
             var geometry = new THREE.PlaneGeometry( 512, 512, worldWidth - 1, worldDepth - 1 );
             geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
@@ -777,11 +778,11 @@ scene.add(sphere);
 
             var floorTexture = new THREE.ImageUtils.loadTexture( 'texture.jpg' );
             floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
-            floorTexture.repeat.set( 10, 10 );
+            floorTexture.repeat.set( 100, 100 );
 
 
-            texture = new THREE.Texture( generateTexture( data, worldWidth, worldDepth ), new THREE.UVMapping(), THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping );
-            texture.needsUpdate = true;
+//            texture = new THREE.Texture( generateTexture( data, worldWidth, worldDepth ), new THREE.UVMapping(), THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping );
+//            texture.needsUpdate = true;
 
             ground = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial(
                                                                             {
