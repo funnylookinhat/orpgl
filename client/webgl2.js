@@ -784,10 +784,10 @@ scene.add(sphere);
                                                                             }));
             scene.add( ground );
             loadtrees(loader,3.4,5,'sprite1',1,0,49,"amplitude","previousRender",attributesS6,"displacement"   );
-            loadtrees(loader,6,20,'sprite2',2,50,99,"amplitude2","previousRender2",attributesS7,"displacement2");
-            loadtrees(loader,7,10,'sprite2',2,100,199,"amplitude2","previousRender2",attributesS7,"displacement2",267,8,0.6,0.7,0.26,0.94,0.7,0.556,0.404);
-            loadtrees(loader,5,30,'sprite2',2,200,399,"amplitude2","previousRender2",attributesS7,"displacement2",300,4,0.3,0.7,0.26,0.9,0.3,0.15,0.404);
-            loadtrees(loader,8,60,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2",540,10,0.9,0.7,0.2,0.4,0.7,0.556,0.404);
+            //loadtrees(loader,6,20,'sprite2',2,50,99,"amplitude2","previousRender2",attributesS7,"displacement2");
+            //loadtrees(loader,7,10,'sprite2',2,100,199,"amplitude2","previousRender2",attributesS7,"displacement2",267,8,0.6,0.7,0.26,0.94,0.7,0.556,0.404);
+            //loadtrees(loader,5,30,'sprite2',2,200,399,"amplitude2","previousRender2",attributesS7,"displacement2",300,4,0.3,0.7,0.26,0.9,0.3,0.15,0.404);
+            //loadtrees(loader,8,60,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2",540,10,0.9,0.7,0.2,0.4,0.7,0.556,0.404);
 /*
             loader.load( 'http://localhost:8080/tree?leaves=0', function ( geometry, materials ) {
 

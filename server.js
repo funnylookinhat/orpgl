@@ -1,27 +1,43 @@
-HOST = null; // localhost
-PORT = 8080; 
+/**
+ * ORPGL server code
+ * E.BOTROS (c) 2013
+ **/
 
+// Define some variables
+var HOST      = null; 
+var PORT      = 8080; 
+var starttime = (new Date()).getTime();
+var nature    = [];
+var trees     = [];
+var bush      = [];
+var branch    = [];
+var mem       = process.memoryUsage();
+
+var MESSAGE_BACKLOG = 1,
+    SESSION_TIMEOUT = 60 * 1000;
+
+
+// Global Server timer
 GTime=0;
-var vm = require("vm"),
-    http = require("http"),
-    url = require("url"),
-    fs = require("fs");
 
-// proctree
+// Requires
+var vm    = require("vm"),          // vm lib (see includeInThisContext)
+    http  = require("http"),        // http server lib
+    url   = require("url"),         // http url lib
+    fs    = require("fs"),          // file system lib
+    sys   = require("sys"),         // sys lib
+    qs    = require("querystring"), // query string lib
+    fu    = require("./fu")         // nodechat fu lib;
+
+// additionnal JS libs
 var includeInThisContext = function(path) {
     var code = fs.readFileSync(path);
     vm.runInThisContext(code, path);
 }.bind(this);
 includeInThisContext("proctree/proctree.js");
 
+// Folder where reside client files
 var appfolder='client';
-var starttime = (new Date()).getTime();
-var nature = [];
-var trees = [];
-var bush = [];
-var branch = [];
-  
-var mem = process.memoryUsage();
 
 // every 10 seconds poll for the memory.
 setInterval(function () {
@@ -32,15 +48,6 @@ setInterval(function () {
 setInterval(function () {
 GTime+=1;
 }, 10);
-
-var fu = require("./fu"),
-    fs = require("fs"),
-    sys = require("sys"),
-    url = require("url"),
-    qs = require("querystring");
-
-var MESSAGE_BACKLOG = 1,
-    SESSION_TIMEOUT = 60 * 1000;
 
 var server = new function () {
   var messages = [],
@@ -55,7 +62,6 @@ var server = new function () {
 
     switch (type) {
       case "msg":
-        //sys.puts("<" + nick + "> " + text);
         break;
       case "join":
         sys.puts(nick + " join");
@@ -197,7 +203,6 @@ fu.get("/branch1.png", fu.staticHandler("branch1.png"));
 fu.get("/branch2.png", fu.staticHandler("branch2.png"));
 fu.get("/monster.jpg", fu.staticHandler("monster.jpg"));
 fu.get("/texture.jpg", fu.staticHandler("texture.jpg"));
-//fu.get("/tree.php", fu.staticHandler("tree.php"));
 
 
 fu.get("/who", function (req, res) {
@@ -229,8 +234,6 @@ fu.get("/join", function (req, res) {
     res.simpleJSON(400, {error: "Nick in use"});
     return;
 }
-
-  //sys.puts("connection: " + nick + "@" + res.connection.remoteAddress);
 
   server.appendMessage(session.nick, "join");
   res.simpleJSON(200, { id: session.id
@@ -316,31 +319,6 @@ var taperRate=0.835;
 var radiusFalloffRate=0.73;
 var twistRate=1.29;
 var trunkLength=2.2;
-
-/*        var seed=810;
-        var segments =10;
-        var vMultiplier=0.66;
-        var twigScale=0.47;
-        var initalBranchLength=0.5;
-        var lengthFalloffFactor=0.85;
-        var lengthFalloffPower=0.99;
-        var clumpMax=0.449;
-        var clumpMin=0.404;
-        var branchFactor=2.75;
-        var dropAmount=0.07;
-        var growAmount=-0.005;
-        var sweepAmount=0.01;
-        var maxRadius=0.269;
-        var climbRate=0.626;
-        var trunkKink=0.108;
-        var treeSteps=4;
-        var taperRate=0.876;
-        var radiusFalloffRate=0.66;
-        var twistRate=2.7;
-        var trunkLength=1.55;*/
-
-        //var leaves=0;
-
 
         for(var key in qs.parse(url.parse(req.url).query)){
             var val = qs.parse(url.parse(req.url).query)[key];
@@ -462,7 +440,6 @@ var trunkLength=2.2;
             name = "leaves"
         }
 
-        // building three.js json model (v3.1)
         var jsosTree = {
             "version" : 2,
             "materials": [  {
