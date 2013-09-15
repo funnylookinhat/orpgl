@@ -4,9 +4,6 @@
 var ns=0; // connected users counter
 var myJSONUserPosArray =new Array(); // users positions array
 var Nature = null; 
-//var Trees = null; 
-//var Bush = null; 
-//var Branch = null; 
 var myJSONUserPosArray2 =new Array(); // users positions array
 var gameScene; // our main scene object
 var moveplayer =false; // users positions array
@@ -330,13 +327,6 @@ $("#canvas").css({"height":"300px","width":"600px"})
     ns=ns.split(',');
   }, "json");
   $("#page").hide();
-/*
-  jQuery.get("/getnature", {}, function (data, status) {
-    if (status != "success") return;
-    Nature=data.nature;
-  }, "json");
-*/
- 
 }
 
 //add a list of present chat members to the stream

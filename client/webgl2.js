@@ -960,9 +960,6 @@ var Boid = function() {
 
         };
         
-//        document.addEventListener( 'keydown', onKeyDown , false );
-//        document.addEventListener( 'keyup', onKeyUp , false );
-
         var attributesS6 = {
             displacement: {
                 type: 'f', // a float
@@ -1029,59 +1026,50 @@ var Boid = function() {
         var android = null;
     
 
-var camera, scene, renderer;
-            var geometry, material, mesh;
-            var controls,time = Date.now();
+        var camera, scene, renderer;
+        var geometry, material, mesh;
+        var controls,time = Date.now();
 
-            var objects = [];
+        var objects = [];
 
-            var ray;
+        var ray;
 
-            var blocker = document.getElementById( 'blocker' );
-            var instructions = document.getElementById( 'instructions' );
-
-            // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
-
-            var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
-
-            if ( havePointerLock ) {
-
-                var element = document.body;
-
-                var pointerlockchange = function ( event ) {
-
-                        controls.enabled = true;
-
-                }
-
-                var pointerlockerror = function ( event ) {
-                }
-
-                // Hook pointer lock state change events
-                document.addEventListener( 'pointerlockchange', pointerlockchange, false );
-                document.addEventListener( 'mozpointerlockchange', pointerlockchange, false );
-                document.addEventListener( 'webkitpointerlockchange', pointerlockchange, false );
-
-                document.addEventListener( 'pointerlockerror', pointerlockerror, false );
-                document.addEventListener( 'mozpointerlockerror', pointerlockerror, false );
-                document.addEventListener( 'webkitpointerlockerror', pointerlockerror, false );
+        var blocker = document.getElementById( 'blocker' );
+        var instructions = document.getElementById( 'instructions' );
 
 
-                    // Ask the browser to lock the pointer
-                    element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+        var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 
-                
+        if ( havePointerLock ) {
 
-                    element.webkitRequestPointerLock();
+            var element = document.body;
 
-            
+            var pointerlockchange = function ( event ) {
 
-
-            } else {
-
-                    alert('Your browser doesn\'t seem to support Pointer Lock API');
+                    controls.enabled = true;
 
             }
+
+            var pointerlockerror = function ( event ) {
+            }
+
+            // Hook pointer lock state change events
+            document.addEventListener( 'pointerlockchange', pointerlockchange, false );
+            document.addEventListener( 'mozpointerlockchange', pointerlockchange, false );
+            document.addEventListener( 'webkitpointerlockchange', pointerlockchange, false );
+
+            document.addEventListener( 'pointerlockerror', pointerlockerror, false );
+            document.addEventListener( 'mozpointerlockerror', pointerlockerror, false );
+            document.addEventListener( 'webkitpointerlockerror', pointerlockerror, false );
+
+
+            // Ask the browser to lock the pointer
+            element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+            element.webkitRequestPointerLock();
+
+        } else {
+            alert('Your browser doesn\'t seem to support Pointer Lock API');
+        }
 
 
         init();
@@ -1089,466 +1077,433 @@ var camera, scene, renderer;
 
 function loadtrees(loader,branchfactor,levels,leafsprite,iduni,idxstart,idxend,amplitude,previousRender,attributes,displacement,seed,segments,vMultiplier,twigScale,initalBranchLength,lengthFalloffFactor,lengthFalloffPower,clumpMax,clumpMin){
 
+    url = 'http://localhost:8080/tree?leaves=0&levels='+levels+'&branchfactor='+branchfactor
+    if (seed != undefined)
+    url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale='+twigScale
+    //+'&initalBranchLength='+initalBranchLength+'&lengthFalloffFactor='+lengthFalloffFactor+'&lengthFalloffPower='+lengthFalloffPower+'&clumpMax='+clumpMax+'&clumpMin='+clumpMin
+    c = loader.load( url, function ( geometry, materials ) {
+        var material = materials[ 0 ];
+        material.color.setHex( 0xffffff );
+        material.ambient.setHex( 0xffffff );
+        var faceMaterial = new THREE.MeshFaceMaterial( materials );
 
-url = 'http://localhost:8080/tree?leaves=0&levels='+levels+'&branchfactor='+branchfactor
-if (seed != undefined)
-url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale='+twigScale
-//+'&initalBranchLength='+initalBranchLength+'&lengthFalloffFactor='+lengthFalloffFactor+'&lengthFalloffPower='+lengthFalloffPower+'&clumpMax='+clumpMax+'&clumpMin='+clumpMin
+        for ( var i = idxstart; i < idxend; i ++ ) {
+            var x = naturePos[0][i];
+            var z = naturePos[1][i];
 
+            morph = new THREE.Mesh( geometry, faceMaterial );
+            var s = THREE.Math.randFloat( 0.00075, 0.001 );
+            morph.scale.set( s, s, s );
+            morph.name="tree"
+            morph.position.set( x, getH(x,z)-0.5, z );
+            morph.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
 
-c = loader.load( url, function ( geometry, materials ) {
+            scene.add( morph );
+            morphs.push( morph );
 
+        }
 
-                var material = materials[ 0 ];
-                material.color.setHex( 0xffffff );
-                material.ambient.setHex( 0xffffff );
-                var faceMaterial = new THREE.MeshFaceMaterial( materials );
+    });
+    url = 'http://localhost:8080/tree?leaves=1&levels='+levels+'&branchfactor='+branchfactor
+    if (seed != undefined)
+    url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale='+twigScale
+    //+'&initalBranchLength='+initalBranchLength+'&lengthFalloffFactor='+lengthFalloffFactor+'&lengthFalloffPower='+lengthFalloffPower+'&clumpMax='+clumpMax+'&clumpMin='+clumpMin
+    loader.load( url, function ( geometry, materials ) {
+        var material = materials[ 0 ];
+        material.color.setHex( 0xffffff );
+        material.ambient.setHex( 0xffffff );
+        material.alphaTest = 0.5;
 
-                for ( var i = idxstart; i < idxend; i ++ ) {
-                    var x = naturePos[0][i];
-                    var z = naturePos[1][i];
+        var faceMaterial = new THREE.MeshFaceMaterial( materials );
 
-                    morph = new THREE.Mesh( geometry, faceMaterial );
-                    var s = THREE.Math.randFloat( 0.00075, 0.001 );
-                    morph.scale.set( s, s, s );
-                    morph.name="tree"
-                    morph.position.set( x, getH(x,z)-0.5, z );
-                    morph.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
+        for ( var i = idxstart; i < idxend; i ++ ) {
 
-                    scene.add( morph );
-                    morphs.push( morph );
+            var x = naturePos[0][i];
+            var z = naturePos[1][i];
 
-                }
-
-            });
-url = 'http://localhost:8080/tree?leaves=1&levels='+levels+'&branchfactor='+branchfactor
-if (seed != undefined)
-url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale='+twigScale
-//+'&initalBranchLength='+initalBranchLength+'&lengthFalloffFactor='+lengthFalloffFactor+'&lengthFalloffPower='+lengthFalloffPower+'&clumpMax='+clumpMax+'&clumpMin='+clumpMin
-
-            loader.load( url, function ( geometry, materials ) {
-
-
-                var material = materials[ 0 ];
-                material.color.setHex( 0xffffff );
-                material.ambient.setHex( 0xffffff );
-                material.alphaTest = 0.5;
-
-                var faceMaterial = new THREE.MeshFaceMaterial( materials );
-
-                for ( var i = idxstart; i < idxend; i ++ ) {
-
-                    var x = naturePos[0][i];
-                    var z = naturePos[1][i];
-
-                    Shaders = {
-                        LitAttributeAnimated: {
-                            'vertex': ["varying vec2 glTexCoord;",
-                    "uniform float "+amplitude+";",
-                                       "attribute float "+displacement+";", 
-                                       "varying vec3 vNormal;",
-                                "void main() {",
-                                 "  glTexCoord = uv;",
-                                        "vNormal = normal;",
-                                        "vec3 newPosition = position + normal * vec3( "+amplitude+" );",
-                                  "  gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );",
-                                "}"
+            Shaders = {
+                LitAttributeAnimated: {
+                    'vertex': ["varying vec2 glTexCoord;",
+            "uniform float "+amplitude+";",
+                               "attribute float "+displacement+";", 
+                               "varying vec3 vNormal;",
+                        "void main() {",
+                         "  glTexCoord = uv;",
+                                "vNormal = normal;",
+                                "vec3 newPosition = position + normal * vec3( "+amplitude+" );",
+                          "  gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );",
+                        "}"
 
 
 
-                                ].join("\n"),
-                                       
-                            'fragment': [           "varying vec2 glTexCoord;",
-
-                               "uniform sampler2D "+leafsprite+";",
-                               "uniform sampler2D "+previousRender+";",
-
-                               "void main() {",
-
-                               "    vec3 color = texture2D( "+previousRender+", glTexCoord ).rgb;",
-
-                               "    color += texture2D( "+leafsprite+", glTexCoord ).rgb;",
-
-                               "    gl_FragColor.rgb = color;",
-                               "    gl_FragColor.a = 1.0;",
-
-                                "if (gl_FragColor.r < 0.05)",
-                               "    discard;",
-                                "if (gl_FragColor.g < 0.05)",
-                               "    discard;",
-                                "if (gl_FragColor.b < 0.05)",
-                               "   discard;",
+                        ].join("\n"),
                                
-                                "if ((gl_FragColor.r < 0.12)&&(gl_FragColor.r >= 0.1))",
-                               "    gl_FragColor.a = 0.5;",
-                                "if ((gl_FragColor.g < 0.12)&&(gl_FragColor.g >= 0.1))",
-                               "    gl_FragColor.a = 0.5;",
-                                "if ((gl_FragColor.b < 0.12)&&(gl_FragColor.b >= 0.1))",
-                               "    gl_FragColor.a = 0.5;",
+                    'fragment': [           "varying vec2 glTexCoord;",
 
-                                       "}"].join("\n")
-                        }
-                    };
+                       "uniform sampler2D "+leafsprite+";",
+                       "uniform sampler2D "+previousRender+";",
 
-                    var shaderMaterial = new THREE.ShaderMaterial({
-                        attributes:     attributes,
-                                uniforms: camera.uniforms[iduni],
-                        vertexShader:   Shaders.LitAttributeAnimated.vertex,
-                        fragmentShader: Shaders.LitAttributeAnimated.fragment
-                    });
-                    
+                       "void main() {",
 
-                    morph2 = new THREE.Mesh( geometry, shaderMaterial );
+                       "    vec3 color = texture2D( "+previousRender+", glTexCoord ).rgb;",
 
-                    var s = THREE.Math.randFloat( 0.00075, 0.001 );
-                    morph2.scale.set( s, s, s );
-                    morph2.name="tree"
-                    
-                    morph2.position.set( x, getH(x,z)-0.5, z );
-                    morph2.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
+                       "    color += texture2D( "+leafsprite+", glTexCoord ).rgb;",
 
+                       "    gl_FragColor.rgb = color;",
+                       "    gl_FragColor.a = 1.0;",
 
-                    scene.add( morph2 );
-                    morphs.push( morph2 );
+                        "if (gl_FragColor.r < 0.05)",
+                       "    discard;",
+                        "if (gl_FragColor.g < 0.05)",
+                       "    discard;",
+                        "if (gl_FragColor.b < 0.05)",
+                       "   discard;",
+                       
+                        "if ((gl_FragColor.r < 0.12)&&(gl_FragColor.r >= 0.1))",
+                       "    gl_FragColor.a = 0.5;",
+                        "if ((gl_FragColor.g < 0.12)&&(gl_FragColor.g >= 0.1))",
+                       "    gl_FragColor.a = 0.5;",
+                        "if ((gl_FragColor.b < 0.12)&&(gl_FragColor.b >= 0.1))",
+                       "    gl_FragColor.a = 0.5;",
 
+                               "}"].join("\n")
                 }
+            };
 
-            } );
+            var shaderMaterial = new THREE.ShaderMaterial({
+                attributes:     attributes,
+                        uniforms: camera.uniforms[iduni],
+                vertexShader:   Shaders.LitAttributeAnimated.vertex,
+                fragmentShader: Shaders.LitAttributeAnimated.fragment
+            });
+            
+
+            morph2 = new THREE.Mesh( geometry, shaderMaterial );
+
+            var s = THREE.Math.randFloat( 0.00075, 0.001 );
+            morph2.scale.set( s, s, s );
+            morph2.name="tree"
+            
+            morph2.position.set( x, getH(x,z)-0.5, z );
+            morph2.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
+            scene.add( morph2 );
+            morphs.push( morph2 );
+
+        }
+
+    } );
 }
 
 function funcdt() {     
-            var loader = new THREE.JSONLoader();
-            loadtrees(loader,3.4,5,'sprite1',1,0,49,"amplitude","previousRender",attributesS6,"displacement"   );
-            loadtrees(loader,6,20,'sprite2',2,50,99,"amplitude2","previousRender2",attributesS7,"displacement2");
-            loadtrees(loader,7,10,'sprite2',2,100,199,"amplitude2","previousRender2",attributesS7,"displacement2",267,8,0.6,0.7,0.26,0.94,0.7,0.556,0.404);
-            loadtrees(loader,5,30,'sprite2',2,200,399,"amplitude2","previousRender2",attributesS7,"displacement2",300,4,0.3,0.7,0.26,0.9,0.3,0.15,0.404);
-            loadtrees(loader,8,60,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2",540,10,0.9,0.7,0.2,0.4,0.7,0.556,0.404);
+    var loader = new THREE.JSONLoader();
+    loadtrees(loader,3.4,5,'sprite1',1,0,49,"amplitude","previousRender",attributesS6,"displacement"   );
+    loadtrees(loader,6,20,'sprite2',2,50,99,"amplitude2","previousRender2",attributesS7,"displacement2");
+    loadtrees(loader,7,10,'sprite2',2,100,199,"amplitude2","previousRender2",attributesS7,"displacement2",267,8,0.6,0.7,0.26,0.94,0.7,0.556,0.404);
+    loadtrees(loader,5,30,'sprite2',2,200,399,"amplitude2","previousRender2",attributesS7,"displacement2",300,4,0.3,0.7,0.26,0.9,0.3,0.15,0.404);
+    loadtrees(loader,8,60,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2",540,10,0.9,0.7,0.2,0.4,0.7,0.556,0.404);
 }
-        function init() {
+function init() {
 
-            sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
-            sprite2 = THREE.ImageUtils.loadTexture( "branch2.png", null );
-           
-            container = document.createElement( 'div' );
-            document.body.appendChild( container );
+    sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
+    sprite2 = THREE.ImageUtils.loadTexture( "branch2.png", null );
+   
+    container = document.createElement( 'div' );
+    document.body.appendChild( container );
 
-   camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
+    camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
 
-            camera.position.set( myPos.x,myPos.y,myPos.z);
-            camera.uniforms=new Array();
-          camera.uniforms[1]=  {
-                        sprite1: { type: "t", value: sprite1 },
-                        previousRender: { type: "t", value: null },
-                        amplitude: {
-                            type: 'f', // a float
-                            value: 0
-                        }
-                    };
-          camera.uniforms[2]=  {
-                        sprite2: { type: "t", value: sprite2 },
-                        previousRender2: { type: "t", value: null },
-                        amplitude2: {
-                            type: 'f', // a float
-                            value: 0
-                        }
-                    };
-            scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2( 0xB4E4F4, 0.0025 );
-                controls = new THREE.PointerLockControls( camera );
-//                alert(controls);
-                scene.add( controls.getObject() );
+    camera.position.set( myPos.x,myPos.y,myPos.z);
+    camera.uniforms=new Array();
+    camera.uniforms[1]=  {
+              sprite1: { type: "t", value: sprite1 },
+                previousRender: { type: "t", value: null },
+                amplitude: {
+                    type: 'f', // a float
+                    value: 0
+                }
+            };
+    camera.uniforms[2]=  {
+                sprite2: { type: "t", value: sprite2 },
+                previousRender2: { type: "t", value: null },
+                amplitude2: {
+                    type: 'f', // a float
+                    value: 0
+                }
+            };
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2( 0xB4E4F4, 0.0025 );
+    controls = new THREE.PointerLockControls( camera );
+    scene.add( controls.getObject() );
 
 
 /*
 
-                controls = new THREE.PointerLockControls( camera );
-                scene.add( controls.getObject() );
+    controls = new THREE.PointerLockControls( camera );
+    scene.add( controls.getObject() );
 
-                birds = [];
-                boids = [];
+    birds = [];
+    boids = [];
 
-                for ( var i = 0; i < 1; i ++ ) {
+    for ( var i = 0; i < 1; i ++ ) {
 
-                    boid = boids[ i ] = new Boid();
-                    boid.position.x = Math.random() * 400 - 200;
-                    boid.position.y = 0;
-                    boid.position.z = Math.random() * 400 - 200;
-                    boid.velocity.x = Math.random() * 2 - 1;
-                    boid.velocity.y = Math.random() * 2 - 1;
-                    boid.velocity.z = Math.random() * 2 - 1;
-                    boid.setAvoidWalls( true );
-                    boid.setWorldSize( 30, 30, 30 );
+        boid = boids[ i ] = new Boid();
+        boid.position.x = Math.random() * 400 - 200;
+        boid.position.y = 0;
+        boid.position.z = Math.random() * 400 - 200;
+        boid.velocity.x = Math.random() * 2 - 1;
+        boid.velocity.y = Math.random() * 2 - 1;
+        boid.velocity.z = Math.random() * 2 - 1;
+        boid.setAvoidWalls( true );
+        boid.setWorldSize( 30, 30, 30 );
 
-                    bird = birds[ i ] = new THREE.Mesh( new Bird(), new THREE.MeshBasicMaterial( { color:Math.random() * 0xffffff } ) );
-                    bird.phase = Math.floor( Math.random() * 62.83 );
-                    bird.position = boids[ i ].position;
-                    bird.doubleSided = true;
-                    // bird.scale.x = bird.scale.y = bird.scale.z = 10;
-                    scene.add( bird );
+        bird = birds[ i ] = new THREE.Mesh( new Bird(), new THREE.MeshBasicMaterial( { color:Math.random() * 0xffffff } ) );
+        bird.phase = Math.floor( Math.random() * 62.83 );
+        bird.position = boids[ i ].position;
+        bird.doubleSided = true;
+        // bird.scale.x = bird.scale.y = bird.scale.z = 10;
+        scene.add( bird );
 
 
-                }*/
+    }*/
 // set up the sphere vars
-var radius = 5,
+    var radius = 5,
     segments = 16,
     rings = 16;
-var sungeo =new THREE.SphereGeometry(
+    var sungeo =new THREE.SphereGeometry(
     radius,
     segments,
     rings);
 
-sungeo.x=0;
-sungeo.y=0;
-sungeo.z=0;
-// create the sphere's material
-var sphereMaterial =
-  new THREE.MeshLambertMaterial(
+    sungeo.x=0;
+    sungeo.y=0;
+    sungeo.z=0;
+    // create the sphere's material
+    var sphereMaterial =
+    new THREE.MeshLambertMaterial(
     {
       color: 0xCC0000
     });
 
-sphere = new THREE.Mesh(
+    sphere = new THREE.Mesh(
 
-  sungeo,
+    sungeo,
 
-  sphereMaterial);
+    sphereMaterial);
 
-// add the sphere to the scene
-//scene.add(sphere);
+    // add the sphere to the scene
+    //scene.add(sphere);
     var jsonLoader = new THREE.JSONLoader();
     jsonLoader.load( "android.js", addModelToScene );
 
 
-function addModelToScene( geometry, materials ) 
-{
-    // for preparing animation
-    for (var i = 0; i < materials.length; i++)
-        materials[i].morphTargets = true;
-        
-    var material = new THREE.MeshFaceMaterial( materials );
-    android = new THREE.Mesh( geometry, material );
-    android.scale.set(.1,.1,.1);
-    android.position.y = getH(0 ,0);
-    scene.add( android );
-}
-            var waterWidth = 1024, waterDepth = 1024;
-            var worldWidth = 256, worldDepth = 256,
-            data = groundGeometry;
-
-
-            var geometry = new THREE.PlaneGeometry( 256, 256, worldWidth - 1, worldDepth - 1 );
-            geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
-
-            for ( var i = 0, l = geometry.vertices.length; i < l; i ++ ) {
-
-                geometry.vertices[ i ].x =geometry.vertices[ i ].x;
-                geometry.vertices[ i ].z =geometry.vertices[ i ].z;
-                geometry.vertices[ i ].y = data[ i ]/5-10;
-                
-                if (heights[Math.floor(geometry.vertices[ i ].x)] == undefined)
-                heights[""+Math.floor(geometry.vertices[ i ].x)] = {};
-                heights[""+Math.floor(geometry.vertices[ i ].x)][""+Math.floor(geometry.vertices[ i ].z)]=geometry.vertices[ i ].y;
+    function addModelToScene( geometry, materials ) 
+    {
+        // for preparing animation
+        for (var i = 0; i < materials.length; i++)
+            materials[i].morphTargets = true;
             
-            }
-
-            var floorTexture = new THREE.ImageUtils.loadTexture( 'texture.jpg' );
-            floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
-            floorTexture.repeat.set( 5, 5 );
-
-            ground = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial(
-                                                                            {
-                                                                            "map": floorTexture
-                                                                            }));
-            scene.add( ground );
-            setTimeout(funcdt, 1000);
-
-            scene.add( new THREE.AmbientLight( 0xffffff ) );
-            var directionalLight = new THREE.DirectionalLight(0xffffff);
-            directionalLight.position.set(1, 1, 1).normalize();
-            scene.add(directionalLight);
-
-            renderer = new THREE.WebGLRenderer();
-            renderer.setSize( window.innerWidth, window.innerHeight );
-            renderer.setClearColor(new THREE.Color(0xB4E4F4));
-            container.appendChild( renderer.domElement );
-
-            window.addEventListener( 'resize', onWindowResize, false );
-
-        }
-
-
-        function generateTexture( data, width, height ) {
-
-            var canvas, canvasScaled, context, image, imageData,
-            level, diff, vector3, sun, shade;
-
-            vector3 = new THREE.Vector3( 0, 0, 0 );
-
-            sun = new THREE.Vector3( 1, 1, 1 );
-            sun.normalize();
-
-            canvas = document.createElement( 'canvas' );
-            canvas.width = width;
-            canvas.height = height;
-
-            context = canvas.getContext( '2d' );
-            context.fillStyle = '#000';
-            context.fillRect( 0, 0, width, height );
-
-            image = context.getImageData( 0, 0, canvas.width, canvas.height );
-            imageData = image.data;
-
-            for ( var i = 0, j = 0, l = imageData.length; i < l; i += 4, j ++ ) {
-
-                vector3.x = data[ j - 2 ] - data[ j + 2 ];
-                vector3.y = 2;
-                vector3.z = data[ j - width * 2 ] - data[ j + width * 2 ];
-                vector3.normalize();
-
-                shade = vector3.dot( sun );
-
-                imageData[ i ] = ( 96 + shade * 128 ) * ( 0.5 + data[ j ] * 0.007 );
-                imageData[ i + 1 ] = ( 32 + shade * 96 ) * ( 0.5 + data[ j ] * 0.007 );
-                imageData[ i + 2 ] = ( shade * 96 ) * ( 0.5 + data[ j ] * 0.007 );
-            }
-        }
-
-            //
-
-        function onWindowResize( event ) {
-
-            renderer.setSize( window.innerWidth, window.innerHeight );
-
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-
-        }
-
-        //
-
-        var t = 0;
-        function animate() {
-
-            requestAnimationFrame( animate );
-
-            if ( t > 30 ) t = 0;
-
-            var delta = clock.getDelta();
-
-            if (don==false && morphs.length>0) dod();
-            
-
-
-                controls.update( Date.now() - time );
-            render();
-            
-        }
-        function dod(){
-
-        //    RAYCASTS (to the ground)
-        /*
-            for (var i = 0 ; i<scene.children.length;i++){
-        if(scene.children[i].name=="tree") {
-              var raycaster = new THREE.Raycaster(scene.children[i].position,new THREE.Vector3( 0, -100000, 0 ));
-                var intersects = raycaster.intersectObjects(scene.children);
-        //        console.log(intersects[0].distance)
-                if (intersects.length>0)
-                scene.children[i].position.y= -intersects[0].distance;
-        }
-            }
-        */
-
-                don=true;
-        }
-        var don=false;
-        var movementSpeed = 0.3;
-        var frame=0;
-function replacer(key, value) {
-    if (typeof value === 'number' && !isFinite(value)) {
-        return String(value);
+        var material = new THREE.MeshFaceMaterial( materials );
+        android = new THREE.Mesh( geometry, material );
+        android.scale.set(.1,.1,.1);
+        android.position.y = getH(0 ,0);
+        scene.add( android );
     }
-    return value;
+    var waterWidth = 1024, waterDepth = 1024;
+    var worldWidth = 256, worldDepth = 256,
+    data = groundGeometry;
+
+
+    var geometry = new THREE.PlaneGeometry( 256, 256, worldWidth - 1, worldDepth - 1 );
+    geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
+
+    for ( var i = 0, l = geometry.vertices.length; i < l; i ++ ) {
+
+        geometry.vertices[ i ].x =geometry.vertices[ i ].x;
+        geometry.vertices[ i ].z =geometry.vertices[ i ].z;
+        geometry.vertices[ i ].y = data[ i ]/5-10;
+        
+        if (heights[Math.floor(geometry.vertices[ i ].x)] == undefined)
+        heights[""+Math.floor(geometry.vertices[ i ].x)] = {};
+        heights[""+Math.floor(geometry.vertices[ i ].x)][""+Math.floor(geometry.vertices[ i ].z)]=geometry.vertices[ i ].y;
+    
+    }
+
+    var floorTexture = new THREE.ImageUtils.loadTexture( 'texture.jpg' );
+    floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+    floorTexture.repeat.set( 5, 5 );
+
+    ground = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial(
+                                                                    {
+                                                                    "map": floorTexture
+                                                                    }));
+    scene.add( ground );
+    setTimeout(funcdt, 1000);
+
+    scene.add( new THREE.AmbientLight( 0xffffff ) );
+    var directionalLight = new THREE.DirectionalLight(0xffffff);
+    directionalLight.position.set(1, 1, 1).normalize();
+    scene.add(directionalLight);
+
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setClearColor(new THREE.Color(0xB4E4F4));
+    container.appendChild( renderer.domElement );
+
+    window.addEventListener( 'resize', onWindowResize, false );
+
 }
 
+
+function generateTexture( data, width, height ) {
+
+    var canvas, canvasScaled, context, image, imageData,
+    level, diff, vector3, sun, shade;
+
+    vector3 = new THREE.Vector3( 0, 0, 0 );
+
+    sun = new THREE.Vector3( 1, 1, 1 );
+    sun.normalize();
+
+    canvas = document.createElement( 'canvas' );
+    canvas.width = width;
+    canvas.height = height;
+
+    context = canvas.getContext( '2d' );
+    context.fillStyle = '#000';
+    context.fillRect( 0, 0, width, height );
+
+    image = context.getImageData( 0, 0, canvas.width, canvas.height );
+    imageData = image.data;
+
+    for ( var i = 0, j = 0, l = imageData.length; i < l; i += 4, j ++ ) {
+
+        vector3.x = data[ j - 2 ] - data[ j + 2 ];
+        vector3.y = 2;
+        vector3.z = data[ j - width * 2 ] - data[ j + width * 2 ];
+        vector3.normalize();
+
+        shade = vector3.dot( sun );
+
+        imageData[ i ] = ( 96 + shade * 128 ) * ( 0.5 + data[ j ] * 0.007 );
+        imageData[ i + 1 ] = ( 32 + shade * 96 ) * ( 0.5 + data[ j ] * 0.007 );
+        imageData[ i + 2 ] = ( shade * 96 ) * ( 0.5 + data[ j ] * 0.007 );
+    }
+}
+
+function onWindowResize( event ) {
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+}
+
+
+    var t = 0;
+    function animate() {
+
+        requestAnimationFrame( animate );
+
+        if ( t > 30 ) t = 0;
+
+        var delta = clock.getDelta();
+
+        if (don==false && morphs.length>0) dod();
+        
+
+        controls.update( Date.now() - time );
+        render();
+        
+    }
+    function dod(){
+
+    //    RAYCASTS (to the ground)
+    /*
+        for (var i = 0 ; i<scene.children.length;i++){
+    if(scene.children[i].name=="tree") {
+          var raycaster = new THREE.Raycaster(scene.children[i].position,new THREE.Vector3( 0, -100000, 0 ));
+            var intersects = raycaster.intersectObjects(scene.children);
+    //        console.log(intersects[0].distance)
+            if (intersects.length>0)
+            scene.children[i].position.y= -intersects[0].distance;
+    }
+        }
+    */
+
+            don=true;
+    }
+    var don=false;
+    var movementSpeed = 0.3;
+    var frame=0;
+    function replacer(key, value) {
+        if (typeof value === 'number' && !isFinite(value)) {
+            return String(value);
+        }
+        return value;
+    }
 
 function checkPos(camera){
     var willsend=false;
     if ((Math.floor(camera.position.x)<myPos.x) || (Math.floor(camera.position.x)>myPos.x)){
         myPos.x=Math.floor(camera.position.x);
         willsend=true;
+    }
+        if ((Math.floor(camera.position.y)<myPos.y) || (Math.floor(camera.position.y)>myPos.y)){
+            myPos.y=Math.floor(camera.position.y);
+            willsend=true;
+    }
+        if ((Math.floor(camera.position.z)<myPos.z) || (Math.floor(camera.position.z)>myPos.z)){
+            myPos.z=Math.floor(camera.position.z);
+            willsend=true;
+    }
+    if (willsend == true)
+        send(JSON.stringify(myPos,replacer));
 }
-    if ((Math.floor(camera.position.y)<myPos.y) || (Math.floor(camera.position.y)>myPos.y)){
-        myPos.y=Math.floor(camera.position.y);
-        willsend=true;
-}
-    if ((Math.floor(camera.position.z)<myPos.z) || (Math.floor(camera.position.z)>myPos.z)){
-        myPos.z=Math.floor(camera.position.z);
-        willsend=true;
-}
-//var js = JSON.parse(myPos);
-if (willsend == true)
-    //alert(JSON.stringify(myPos))
-    send(JSON.stringify(myPos,replacer));
-}
-var lastpos=null
-        function render() {
-var xc,yc,zc=0;
-for (var prop in myJSONUserPosArray2) {
-        var tt = JSON.parse(myJSONUserPosArray2[prop])
-if ((    lastpos!=myJSONUserPosArray2[prop]) && (prop !=CONFIG.nick))
-    {
-for (var prop2 in tt) {
-if (prop2='x')
-    xc=tt[prop2];
-if (prop2='y')
-    yc=tt[prop2];
-if (prop2='z')
-    zc=tt[prop2];
-}
-android.position.x=xc;
-android.position.y=yc;
-android.position.z=zc;
- console.log   (android.geometry.x);
- }
-       lastpos=myJSONUserPosArray2[prop]
 
-}/*
-            for ( var i = 0, il = birds.length; i < il; i++ ) {
+var lastpos=null;
 
-                    boid = boids[ i ];
-                    boid.run( boids );
-
-                    bird = birds[ i ];
-
-                    color = bird.material.color;
-                    color.r = color.g = color.b = ( 500 - bird.position.z ) / 1000;
-
-                    bird.rotation.y = Math.atan2( - boid.velocity.z, boid.velocity.x );
-                    bird.rotation.z = Math.asin( boid.velocity.y / boid.velocity.length() );
-
-                    bird.phase = ( bird.phase + ( Math.max( 0, bird.rotation.z ) + 0.1 )  ) % 62.83;
-                    bird.geometry.vertices[ 5 ].x = bird.geometry.vertices[ 4 ].x = Math.sin( bird.phase ) * 5;
-
-                }
-*/
-            camera.uniforms[1].amplitude.value = 3*Math.sin(frame)+Math.cos(frame);
-            camera.uniforms[2].amplitude2.value = 3*Math.sin(frame)+Math.cos(frame);
-            frame += 0.04;
-            var timer = Date.now() * 0.00005;
-            var actualMoveSpeed =  movementSpeed;
-/*
-            if (moveForward ) camera.translateZ( - ( actualMoveSpeed ) );
-            if ( moveBackward ) camera.translateZ( actualMoveSpeed );
-
-            if ( moveLeft ) camera.translateX( - actualMoveSpeed );
-            if ( moveRight ) camera.translateX( actualMoveSpeed );
-
-            if ( moveUp ) camera.translateY( actualMoveSpeed );
-            if ( moveDown ) camera.translateY( - actualMoveSpeed );
-
-            camera.position.y = getH(camera.position.x ,camera.position.z)+3;
-
-            camera.lookAt( scene.position );*/
-            renderer.render( scene, camera );
-
+function render() {
+    var xc,yc,zc=0;
+    for (var prop in myJSONUserPosArray2) {
+            var tt = JSON.parse(myJSONUserPosArray2[prop])
+        if ((    lastpos!=myJSONUserPosArray2[prop]) && (prop !=CONFIG.nick)) {
+            for (var prop2 in tt) {
+            if (prop2='x')
+                xc=tt[prop2];
+            if (prop2='y')
+                yc=tt[prop2];
+            if (prop2='z')
+                zc=tt[prop2];
+            }
+            android.position.x=xc;
+            android.position.y=yc;
+            android.position.z=zc;
         }
+        lastpos=myJSONUserPosArray2[prop]
+
+    }
+/*
+    for ( var i = 0, il = birds.length; i < il; i++ ) {
+
+        boid = boids[ i ];
+        boid.run( boids );
+
+        bird = birds[ i ];
+
+        color = bird.material.color;
+        color.r = color.g = color.b = ( 500 - bird.position.z ) / 1000;
+
+        bird.rotation.y = Math.atan2( - boid.velocity.z, boid.velocity.x );
+        bird.rotation.z = Math.asin( boid.velocity.y / boid.velocity.length() );
+
+        bird.phase = ( bird.phase + ( Math.max( 0, bird.rotation.z ) + 0.1 )  ) % 62.83;
+        bird.geometry.vertices[ 5 ].x = bird.geometry.vertices[ 4 ].x = Math.sin( bird.phase ) * 5;
+
+    }
+*/
+    camera.uniforms[1].amplitude.value = 3*Math.sin(frame)+Math.cos(frame);
+    camera.uniforms[2].amplitude2.value = 3*Math.sin(frame)+Math.cos(frame);
+    frame += 0.04;
+    renderer.render( scene, camera );
+
+}
+
+
