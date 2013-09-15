@@ -12,7 +12,7 @@ var includeInThisContext = function(path) {
     var code = fs.readFileSync(path);
     vm.runInThisContext(code, path);
 }.bind(this);
-includeInThisContext("../proctree.js/proctree.js");
+includeInThisContext("proctree/proctree.js");
 
 var appfolder='client';
 var starttime = (new Date()).getTime();

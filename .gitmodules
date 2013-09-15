@@ -1,0 +1,3 @@
+[submodule "proctree"]
+	path = proctree
+	url = git@github.com:mebyz/proctree.js.git
