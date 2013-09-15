@@ -655,10 +655,10 @@ url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale
 function funcdt() {     
             var loader = new THREE.JSONLoader();
             loadtrees(loader,3.4,5,'sprite1',1,0,49,"amplitude","previousRender",attributesS6,"displacement"   );
-            //loadtrees(loader,6,20,'sprite2',2,50,99,"amplitude2","previousRender2",attributesS7,"displacement2");
-            //loadtrees(loader,7,10,'sprite2',2,100,199,"amplitude2","previousRender2",attributesS7,"displacement2",267,8,0.6,0.7,0.26,0.94,0.7,0.556,0.404);
-            //loadtrees(loader,5,30,'sprite2',2,200,399,"amplitude2","previousRender2",attributesS7,"displacement2",300,4,0.3,0.7,0.26,0.9,0.3,0.15,0.404);
-            //loadtrees(loader,8,60,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2",540,10,0.9,0.7,0.2,0.4,0.7,0.556,0.404);
+            loadtrees(loader,6,20,'sprite2',2,50,99,"amplitude2","previousRender2",attributesS7,"displacement2");
+            loadtrees(loader,7,10,'sprite2',2,100,199,"amplitude2","previousRender2",attributesS7,"displacement2",267,8,0.6,0.7,0.26,0.94,0.7,0.556,0.404);
+            loadtrees(loader,5,30,'sprite2',2,200,399,"amplitude2","previousRender2",attributesS7,"displacement2",300,4,0.3,0.7,0.26,0.9,0.3,0.15,0.404);
+            loadtrees(loader,8,60,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2",540,10,0.9,0.7,0.2,0.4,0.7,0.556,0.404);
 }
         function init() {
 
@@ -734,9 +734,7 @@ var sphereMaterial =
     {
       color: 0xCC0000
     });
-// create a new mesh with
-// sphere geometry - we will cover
-// the sphereMaterial next!
+
 sphere = new THREE.Mesh(
 
   sungeo,
@@ -746,29 +744,19 @@ sphere = new THREE.Mesh(
 // add the sphere to the scene
 scene.add(sphere);
 
-
-/*            for ( var i = 0; i <500; i ++ ) {
-
-                // random placement in a grid
-
-                posX[i] = THREE.Math.randFloatSpread( 256 );
-                posY[i] = THREE.Math.randFloatSpread( 256 );
-            }*/
-
             var waterWidth = 1024, waterDepth = 1024;
-            var worldWidth = 512, worldDepth = 512,
+            var worldWidth = 256, worldDepth = 256,
             data = groundGeometry;
 
-            //data2 = generateHeight( waterWidth, waterDepth );
 
-            var geometry = new THREE.PlaneGeometry( 512, 512, worldWidth - 1, worldDepth - 1 );
+            var geometry = new THREE.PlaneGeometry( 256, 256, worldWidth - 1, worldDepth - 1 );
             geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
 
             for ( var i = 0, l = geometry.vertices.length; i < l; i ++ ) {
 
                 geometry.vertices[ i ].x =geometry.vertices[ i ].x;
                 geometry.vertices[ i ].z =geometry.vertices[ i ].z;
-                geometry.vertices[ i ].y = data[ i ]/10-10;
+                geometry.vertices[ i ].y = data[ i ]/5-10;
                 
                 if (heights[Math.floor(geometry.vertices[ i ].x)] == undefined)
                 heights[""+Math.floor(geometry.vertices[ i ].x)] = {};
@@ -778,18 +766,13 @@ scene.add(sphere);
 
             var floorTexture = new THREE.ImageUtils.loadTexture( 'texture.jpg' );
             floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
-            floorTexture.repeat.set( 100, 100 );
-
-
-//            texture = new THREE.Texture( generateTexture( data, worldWidth, worldDepth ), new THREE.UVMapping(), THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping );
-//            texture.needsUpdate = true;
+            floorTexture.repeat.set( 5, 5 );
 
             ground = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial(
                                                                             {
                                                                             "map": floorTexture
                                                                             }));
             scene.add( ground );
-
             setTimeout(funcdt, 1000);
 
 /*
@@ -937,34 +920,6 @@ scene.add(sphere);
 
         }
 
-        function generateHeight( width, height ) {
-
-            var size = width * height, data = new Float32Array( size ),
-            perlin = new ImprovedNoise(), quality = 1, z = Math.random() * 100;
-
-            for ( var i = 0; i < size; i ++ ) {
-
-                data[ i ] = 0
-
-            }
-
-            for ( var j = 0; j < 4; j ++ ) {
-
-                for ( var i = 0; i < size; i ++ ) {
-
-                    var x = i % width, y = ~~ ( i / width );
-                    data[ i ] += Math.abs( perlin.noise( x / quality, y / quality, z ) * quality * 1.75 );
-
-
-                }
-
-                quality *= 5;
-
-            }
-
-            return data;
-
-        }
 
         function generateTexture( data, width, height ) {
 

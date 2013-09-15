@@ -261,7 +261,7 @@ function createnature() {
       }
     }
 
-            var worldWidth = 512, worldDepth = 512,
+            var worldWidth = 256, worldDepth = 256,
     dataground = generateHeight( worldWidth, worldDepth );
     s= "var naturePos="+JSON.stringify(Array(nature['posX'],nature['posY']), undefined, 2)+';'
     s+= "var groundGeometry="+JSON.stringify(dataground)+';';
