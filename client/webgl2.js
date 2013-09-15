@@ -1,4 +1,522 @@
 
+
+THREE.Euler = function ( x, y, z, order ) {
+
+    this._x = x || 0;
+    this._y = y || 0;
+    this._z = z || 0;
+    this._order = order || THREE.Euler.DefaultOrder;
+
+};
+
+THREE.Euler.RotationOrders = [ 'XYZ', 'YZX', 'ZXY', 'XZY', 'YXZ', 'ZYX' ];
+
+THREE.Euler.DefaultOrder = 'XYZ';
+
+THREE.Euler.prototype = {
+
+    constructor: THREE.Euler,
+
+    _x: 0, _y: 0, _z: 0, _order: THREE.Euler.DefaultOrder,
+
+    _quaternion: undefined,
+
+    _updateQuaternion: function () {
+
+        if ( this._quaternion !== undefined ) {
+
+            this._quaternion.setFromEuler( this, false );
+
+        }
+
+    },
+
+    get x () {
+
+        return this._x;
+
+    },
+
+    set x ( value ) {
+
+        this._x = value;
+        this._updateQuaternion();
+
+    },
+
+    get y () {
+
+        return this._y;
+
+    },
+
+    set y ( value ) {
+
+        this._y = value;
+        this._updateQuaternion();
+
+    },
+
+    get z () {
+
+        return this._z;
+
+    },
+
+    set z ( value ) {
+
+        this._z = value;
+        this._updateQuaternion();
+
+    },
+
+    get order () {
+
+        return this._order;
+
+    },
+
+    set order ( value ) {
+
+        this._order = value;
+        this._updateQuaternion();
+
+    },
+
+    set: function ( x, y, z, order ) {
+
+        this._x = x;
+        this._y = y;
+        this._z = z;
+        this._order = order || this._order;
+
+        this._updateQuaternion();
+
+        return this;
+
+    },
+
+    copy: function ( euler ) {
+
+        this._x = euler._x;
+        this._y = euler._y;
+        this._z = euler._z;
+        this._order = euler._order;
+
+        this._updateQuaternion();
+
+        return this;
+
+    },
+
+    setFromRotationMatrix: function ( m, order ) {
+
+        // assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled)
+
+        // clamp, to handle numerical problems
+
+        function clamp( x ) {
+
+            return Math.min( Math.max( x, -1 ), 1 );
+
+        }
+
+        var te = m.elements;
+        var m11 = te[0], m12 = te[4], m13 = te[8];
+        var m21 = te[1], m22 = te[5], m23 = te[9];
+        var m31 = te[2], m32 = te[6], m33 = te[10];
+
+        order = order || this._order;
+
+        if ( order === 'XYZ' ) {
+
+            this._y = Math.asin( clamp( m13 ) );
+
+            if ( Math.abs( m13 ) < 0.99999 ) {
+
+                this._x = Math.atan2( - m23, m33 );
+                this._z = Math.atan2( - m12, m11 );
+
+            } else {
+
+                this._x = Math.atan2( m32, m22 );
+                this._z = 0;
+
+            }
+
+        } else if ( order === 'YXZ' ) {
+
+            this._x = Math.asin( - clamp( m23 ) );
+
+            if ( Math.abs( m23 ) < 0.99999 ) {
+
+                this._y = Math.atan2( m13, m33 );
+                this._z = Math.atan2( m21, m22 );
+
+            } else {
+
+                this._y = Math.atan2( - m31, m11 );
+                this._z = 0;
+
+            }
+
+        } else if ( order === 'ZXY' ) {
+
+            this._x = Math.asin( clamp( m32 ) );
+
+            if ( Math.abs( m32 ) < 0.99999 ) {
+
+                this._y = Math.atan2( - m31, m33 );
+                this._z = Math.atan2( - m12, m22 );
+
+            } else {
+
+                this._y = 0;
+                this._z = Math.atan2( m21, m11 );
+
+            }
+
+        } else if ( order === 'ZYX' ) {
+
+            this._y = Math.asin( - clamp( m31 ) );
+
+            if ( Math.abs( m31 ) < 0.99999 ) {
+
+                this._x = Math.atan2( m32, m33 );
+                this._z = Math.atan2( m21, m11 );
+
+            } else {
+
+                this._x = 0;
+                this._z = Math.atan2( - m12, m22 );
+
+            }
+
+        } else if ( order === 'YZX' ) {
+
+            this._z = Math.asin( clamp( m21 ) );
+
+            if ( Math.abs( m21 ) < 0.99999 ) {
+
+                this._x = Math.atan2( - m23, m22 );
+                this._y = Math.atan2( - m31, m11 );
+
+            } else {
+
+                this._x = 0;
+                this._y = Math.atan2( m13, m33 );
+
+            }
+
+        } else if ( order === 'XZY' ) {
+
+            this._z = Math.asin( - clamp( m12 ) );
+
+            if ( Math.abs( m12 ) < 0.99999 ) {
+
+                this._x = Math.atan2( m32, m22 );
+                this._y = Math.atan2( m13, m11 );
+
+            } else {
+
+                this._x = Math.atan2( - m23, m33 );
+                this._y = 0;
+
+            }
+
+        } else {
+
+            console.warn( 'WARNING: Euler.setFromRotationMatrix() given unsupported order: ' + order )
+
+        }
+
+        this._order = order;
+
+        this._updateQuaternion();
+
+        return this;
+
+    },
+
+    setFromQuaternion: function ( q, order, update ) {
+
+        // q is assumed to be normalized
+
+        // clamp, to handle numerical problems
+
+        function clamp( x ) {
+
+            return Math.min( Math.max( x, -1 ), 1 );
+
+        }
+
+        // http://www.mathworks.com/matlabcentral/fileexchange/20696-function-to-convert-between-dcm-euler-angles-quaternions-and-euler-vectors/content/SpinCalc.m
+
+        var sqx = q.x * q.x;
+        var sqy = q.y * q.y;
+        var sqz = q.z * q.z;
+        var sqw = q.w * q.w;
+
+        order = order || this._order;
+
+        if ( order === 'XYZ' ) {
+
+            this._x = Math.atan2( 2 * ( q.x * q.w - q.y * q.z ), ( sqw - sqx - sqy + sqz ) );
+            this._y = Math.asin(  clamp( 2 * ( q.x * q.z + q.y * q.w ) ) );
+            this._z = Math.atan2( 2 * ( q.z * q.w - q.x * q.y ), ( sqw + sqx - sqy - sqz ) );
+
+        } else if ( order ===  'YXZ' ) {
+
+            this._x = Math.asin(  clamp( 2 * ( q.x * q.w - q.y * q.z ) ) );
+            this._y = Math.atan2( 2 * ( q.x * q.z + q.y * q.w ), ( sqw - sqx - sqy + sqz ) );
+            this._z = Math.atan2( 2 * ( q.x * q.y + q.z * q.w ), ( sqw - sqx + sqy - sqz ) );
+
+        } else if ( order === 'ZXY' ) {
+
+            this._x = Math.asin(  clamp( 2 * ( q.x * q.w + q.y * q.z ) ) );
+            this._y = Math.atan2( 2 * ( q.y * q.w - q.z * q.x ), ( sqw - sqx - sqy + sqz ) );
+            this._z = Math.atan2( 2 * ( q.z * q.w - q.x * q.y ), ( sqw - sqx + sqy - sqz ) );
+
+        } else if ( order === 'ZYX' ) {
+
+            this._x = Math.atan2( 2 * ( q.x * q.w + q.z * q.y ), ( sqw - sqx - sqy + sqz ) );
+            this._y = Math.asin(  clamp( 2 * ( q.y * q.w - q.x * q.z ) ) );
+            this._z = Math.atan2( 2 * ( q.x * q.y + q.z * q.w ), ( sqw + sqx - sqy - sqz ) );
+
+        } else if ( order === 'YZX' ) {
+
+            this._x = Math.atan2( 2 * ( q.x * q.w - q.z * q.y ), ( sqw - sqx + sqy - sqz ) );
+            this._y = Math.atan2( 2 * ( q.y * q.w - q.x * q.z ), ( sqw + sqx - sqy - sqz ) );
+            this._z = Math.asin(  clamp( 2 * ( q.x * q.y + q.z * q.w ) ) );
+
+        } else if ( order === 'XZY' ) {
+
+            this._x = Math.atan2( 2 * ( q.x * q.w + q.y * q.z ), ( sqw - sqx + sqy - sqz ) );
+            this._y = Math.atan2( 2 * ( q.x * q.z + q.y * q.w ), ( sqw + sqx - sqy - sqz ) );
+            this._z = Math.asin(  clamp( 2 * ( q.z * q.w - q.x * q.y ) ) );
+
+        } else {
+
+            console.warn( 'WARNING: Euler.setFromQuaternion() given unsupported order: ' + order )
+
+        }
+
+        this._order = order;
+
+        if ( update !== false ) this._updateQuaternion();
+
+        return this;
+
+    },
+
+    reorder: function () {
+
+        // WARNING: this discards revolution information -bhouston
+
+        var q = new THREE.Quaternion();
+
+        return function ( newOrder ) {
+
+            q.setFromEuler( this );
+            this.setFromQuaternion( q, newOrder );
+
+        };
+
+
+    }(),
+
+    fromArray: function ( array ) {
+
+        this._x = array[ 0 ];
+        this._y = array[ 1 ];
+        this._z = array[ 2 ];
+        if ( array[ 3 ] !== undefined ) this._order = array[ 3 ];
+
+        this._updateQuaternion();
+
+        return this;
+
+    },
+
+    toArray: function () {
+
+        return [ this._x, this._y, this._z, this._order ];
+
+    },
+
+    equals: function ( euler ) {
+
+        return ( euler._x === this._x ) && ( euler._y === this._y ) && ( euler._z === this._z ) && ( euler._order === this._order );
+
+    },
+
+    clone: function () {
+
+        return new THREE.Euler( this._x, this._y, this._z, this._order );
+
+    }
+
+};
+THREE.PointerLockControls = function ( camera ) {
+console.log("YES");
+
+    var scope = this;
+
+    camera.rotation.set( 0, 0, 0 );
+
+    var pitchObject = new THREE.Object3D();
+    pitchObject.add( camera );
+
+    var yawObject = new THREE.Object3D();
+    yawObject.position.y = 10;
+    yawObject.add( pitchObject );
+
+    var moveForward = false;
+    var moveBackward = false;
+    var moveLeft = false;
+    var moveRight = false;
+
+    var isOnObject = false;
+    var canJump = false;
+
+    var velocity = new THREE.Vector3();
+
+    var PI_2 = Math.PI / 2;
+
+    var onMouseMove = function ( event ) {
+
+        if ( scope.enabled === false ) return;
+
+        var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+        yawObject.rotation.y -= movementX * 0.002;
+        pitchObject.rotation.x -= movementY * 0.002;
+
+        pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
+
+    };
+
+    var onKeyDown = function ( event ) {
+
+        switch ( event.keyCode ) {
+
+            case 38: // up
+            case 87: // w
+                moveForward = true;
+                break;
+
+            case 37: // left
+            case 65: // a
+                moveLeft = true; break;
+
+            case 40: // down
+            case 83: // s
+                moveBackward = true;
+                break;
+
+            case 39: // right
+            case 68: // d
+                moveRight = true;
+                break;
+
+            case 32: // space
+                if ( canJump === true ) velocity.y += 10;
+                canJump = false;
+                break;
+
+        }
+
+    };
+
+    var onKeyUp = function ( event ) {
+
+        switch( event.keyCode ) {
+
+            case 38: // up
+            case 87: // w
+                moveForward = false;
+                break;
+
+            case 37: // left
+            case 65: // a
+                moveLeft = false;
+                break;
+
+            case 40: // down
+            case 83: // a
+                moveBackward = false;
+                break;
+
+            case 39: // right
+            case 68: // d
+                moveRight = false;
+                break;
+
+        }
+
+    };
+    document.addEventListener( 'mousemove', onMouseMove, false );
+    document.addEventListener( 'keydown', onKeyDown, false );
+    document.addEventListener( 'keyup', onKeyUp, false );
+
+    this.enabled = true;
+
+    this.getObject = function () {
+
+        return yawObject;
+
+    };
+
+    this.isOnObject = function ( boolean ) {
+
+        isOnObject = boolean;
+        canJump = boolean;
+
+    };
+
+    this.getDirection = function() {
+
+        // assumes the camera itself is not rotated
+
+        var direction = new THREE.Vector3( 0, 0, -1 );
+        var rotation = new THREE.Euler( 0, 0, 0, "YXZ" );
+
+        return function( v ) {
+
+            rotation.set( pitchObject.rotation.x, yawObject.rotation.y, 0 );
+
+            v.copy( direction ).applyEuler( rotation );
+
+            return v;
+
+        }
+
+    }();
+
+    this.update = function ( delta ) {
+
+        if ( scope.enabled === false ) return;
+
+        delta = 1;
+
+        //velocity.x += ( - velocity.x ) * 0.08 * delta;
+        //velocity.z += ( - velocity.z ) * 0.08 * delta;
+
+        //velocity.y -= 0.25 * delta;
+
+        if ( moveForward ) velocity.z -= 0.012 * delta;
+        if ( moveBackward ) velocity.z += 0.012 * delta;
+
+        if ( moveLeft ) velocity.x -= 0.012 * delta;
+        if ( moveRight ) velocity.x += 0.012 * delta;
+
+        yawObject.translateX( velocity.x );
+        yawObject.translateZ( velocity.z );
+        yawObject.position.y= getH(yawObject.position.x ,yawObject.position.z); 
+    };
+
+};
  var Bird = function () {
 
     var scope = this;
@@ -440,8 +958,8 @@ var Boid = function() {
 
         };
         
-        document.addEventListener( 'keydown', onKeyDown , false );
-        document.addEventListener( 'keyup', onKeyUp , false );
+//        document.addEventListener( 'keydown', onKeyDown , false );
+//        document.addEventListener( 'keyup', onKeyUp , false );
 
         var attributesS6 = {
             displacement: {
@@ -507,6 +1025,62 @@ var Boid = function() {
         var myPos = { 'x':2,'y':4,'z':5};
         var sphere = null;
     
+
+var camera, scene, renderer;
+            var geometry, material, mesh;
+            var controls,time = Date.now();
+
+            var objects = [];
+
+            var ray;
+
+            var blocker = document.getElementById( 'blocker' );
+            var instructions = document.getElementById( 'instructions' );
+
+            // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
+
+            var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
+
+            if ( havePointerLock ) {
+
+                var element = document.body;
+
+                var pointerlockchange = function ( event ) {
+
+                        controls.enabled = true;
+
+                }
+
+                var pointerlockerror = function ( event ) {
+                }
+
+                // Hook pointer lock state change events
+                document.addEventListener( 'pointerlockchange', pointerlockchange, false );
+                document.addEventListener( 'mozpointerlockchange', pointerlockchange, false );
+                document.addEventListener( 'webkitpointerlockchange', pointerlockchange, false );
+
+                document.addEventListener( 'pointerlockerror', pointerlockerror, false );
+                document.addEventListener( 'mozpointerlockerror', pointerlockerror, false );
+                document.addEventListener( 'webkitpointerlockerror', pointerlockerror, false );
+
+
+                    // Ask the browser to lock the pointer
+                    element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+
+                
+
+                    element.webkitRequestPointerLock();
+
+            
+
+
+            } else {
+
+                    alert('Your browser doesn\'t seem to support Pointer Lock API');
+
+            }
+
+
         init();
         animate();
 
@@ -532,11 +1106,6 @@ c = loader.load( url, function ( geometry, materials ) {
                     var z = naturePos[1][i];
 
                     morph = new THREE.Mesh( geometry, faceMaterial );
-
-                    morph.duration = 1000;
-
-                    morph.time = 1000 * Math.random();
-
                     var s = THREE.Math.randFloat( 0.00075, 0.001 );
                     morph.scale.set( s, s, s );
                     morph.name="tree"
@@ -544,7 +1113,6 @@ c = loader.load( url, function ( geometry, materials ) {
                     morph.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
 
                     scene.add( morph );
-
                     morphs.push( morph );
 
                 }
@@ -629,12 +1197,6 @@ url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale
 
                     morph2 = new THREE.Mesh( geometry, shaderMaterial );
 
-
-
-                    morph2.duration = 1000;
-
-                    morph2.time = 1000 * Math.random();
-
                     var s = THREE.Math.randFloat( 0.00075, 0.001 );
                     morph2.scale.set( s, s, s );
                     morph2.name="tree"
@@ -644,7 +1206,6 @@ url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale
 
 
                     scene.add( morph2 );
-
                     morphs.push( morph2 );
 
                 }
@@ -690,7 +1251,15 @@ function funcdt() {
                     };
             scene = new THREE.Scene();
             scene.fog = new THREE.FogExp2( 0xB4E4F4, 0.0025 );
+                controls = new THREE.PointerLockControls( camera );
+//                alert(controls);
+                scene.add( controls.getObject() );
 
+
+/*
+
+                controls = new THREE.PointerLockControls( camera );
+                scene.add( controls.getObject() );
 
                 birds = [];
                 boids = [];
@@ -715,7 +1284,7 @@ function funcdt() {
                     scene.add( bird );
 
 
-                }
+                }*/
 // set up the sphere vars
 var radius = 5,
     segments = 16,
@@ -775,137 +1344,6 @@ scene.add(sphere);
             scene.add( ground );
             setTimeout(funcdt, 1000);
 
-/*
-            loader.load( 'http://localhost:8080/tree?leaves=0', function ( geometry, materials ) {
-
-
-                var material = materials[ 0 ];
-                material.color.setHex( 0xffffff );
-                material.ambient.setHex( 0xffffff );
-
-                var faceMaterial = new THREE.MeshFaceMaterial( materials );
-
-                for ( var i = 0; i < 50; i ++ ) {
-
-                    var x = posX[i];
-                    var z = posY[i];
-
-                    morph = new THREE.Mesh( geometry, faceMaterial );
-
-                    morph.duration = 1000;
-
-                    morph.time = 1000 * Math.random();
-
-                    var s = THREE.Math.randFloat( 0.00075, 0.001 );
-                    morph.scale.set( s, s, s );
-                    morph.name="tree"
-                    morph.position.set( x, getH(x,z)-0.5, z );
-                    morph.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
-
-                    scene.add( morph );
-
-                    morphs.push( morph );
-
-                }
-
-            });
-            loader.load( 'http://localhost:8080/tree?leaves=1', function ( geometry, materials ) {
-
-
-                var material = materials[ 0 ];
-                material.color.setHex( 0xffffff );
-                material.ambient.setHex( 0xffffff );
-                material.alphaTest = 0.5;
-
-                var faceMaterial = new THREE.MeshFaceMaterial( materials );
-
-                for ( var i = 0; i < 50; i ++ ) {
-
-                    var x = posX[i];
-                    var z = posY[i];
-
-                    Shaders = {
-                        LitAttributeAnimated: {
-                            'vertex': ["varying vec2 glTexCoord;",
-                    "uniform float amplitude;",
-                                       "attribute float displacement;", 
-                                       "varying vec3 vNormal;",
-                                "void main() {",
-                                 "  glTexCoord = uv;",
-                                        "vNormal = normal;",
-                                        "vec3 newPosition = position + normal * vec3( amplitude );",
-                                  "  gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );",
-                                "}"
-
-
-
-                                ].join("\n"),
-                                       
-                            'fragment': [           "varying vec2 glTexCoord;",
-
-                               "uniform sampler2D sprite1;",
-                               "uniform sampler2D previousRender;",
-
-                               "void main() {",
-
-                               "    vec3 color = texture2D( previousRender, glTexCoord ).rgb;",
-
-                               "    color += texture2D( sprite1, glTexCoord ).rgb;",
-
-                               "    gl_FragColor.rgb = color;",
-                               "    gl_FragColor.a = 1.0;",
-
-                                "if (gl_FragColor.r < 0.1)",
-                               "    discard;",
-                                "if (gl_FragColor.g < 0.1)",
-                               "    discard;",
-                                "if (gl_FragColor.b < 0.1)",
-                               "   discard;",
-                               
-                                "if ((gl_FragColor.r < 0.12)&&(gl_FragColor.r >= 0.1))",
-                               "    gl_FragColor.a = 0.5;",
-                                "if ((gl_FragColor.g < 0.12)&&(gl_FragColor.g >= 0.1))",
-                               "    gl_FragColor.a = 0.5;",
-                                "if ((gl_FragColor.b < 0.12)&&(gl_FragColor.b >= 0.1))",
-                               "    gl_FragColor.a = 0.5;",
-
-                                       "}"].join("\n")
-                        }
-                    };
-           
-
-                    var shaderMaterial = new THREE.ShaderMaterial({
-                        attributes:     attributesS6,
-                                uniforms: camera.uniforms1,
-                        vertexShader:   Shaders.LitAttributeAnimated.vertex,
-                        fragmentShader: Shaders.LitAttributeAnimated.fragment
-                    });
-                    
-
-                    morph2 = new THREE.Mesh( geometry, shaderMaterial );
-
-
-
-                    morph2.duration = 1000;
-
-                    morph2.time = 1000 * Math.random();
-
-                    var s = THREE.Math.randFloat( 0.00075, 0.001 );
-                    morph2.scale.set( s, s, s );
-                    morph2.name="tree"
-                    
-                    morph2.position.set( x, getH(x,z)-0.5, z );
-                    morph2.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
-
-
-                    scene.add( morph2 );
-
-                    morphs.push( morph2 );
-
-                }
-
-            } );
-*/
             scene.add( new THREE.AmbientLight( 0xffffff ) );
             var directionalLight = new THREE.DirectionalLight(0xffffff);
             directionalLight.position.set(1, 1, 1).normalize();
@@ -980,6 +1418,10 @@ scene.add(sphere);
             var delta = clock.getDelta();
 
             if (don==false && morphs.length>0) dod();
+            
+
+
+                controls.update( Date.now() - time );
             render();
             
         }
@@ -1052,7 +1494,7 @@ sphere.position.z=zc;
  }
        lastpos=myJSONUserPosArray2[prop]
 
-}
+}/*
             for ( var i = 0, il = birds.length; i < il; i++ ) {
 
                     boid = boids[ i ];
@@ -1070,13 +1512,13 @@ sphere.position.z=zc;
                     bird.geometry.vertices[ 5 ].x = bird.geometry.vertices[ 4 ].x = Math.sin( bird.phase ) * 5;
 
                 }
-
+*/
             camera.uniforms[1].amplitude.value = 3*Math.sin(frame)+Math.cos(frame);
             camera.uniforms[2].amplitude2.value = 3*Math.sin(frame)+Math.cos(frame);
             frame += 0.04;
             var timer = Date.now() * 0.00005;
             var actualMoveSpeed =  movementSpeed;
-
+/*
             if (moveForward ) camera.translateZ( - ( actualMoveSpeed ) );
             if ( moveBackward ) camera.translateZ( actualMoveSpeed );
 
@@ -1088,7 +1530,7 @@ sphere.position.z=zc;
 
             camera.position.y = getH(camera.position.x ,camera.position.z)+3;
 
-            camera.lookAt( scene.position );
+            camera.lookAt( scene.position );*/
 checkPos();
             renderer.render( scene, camera );
 
