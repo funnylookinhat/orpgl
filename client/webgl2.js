@@ -500,10 +500,10 @@ console.log("YES");
 
         delta = 1;
 
-        //velocity.x += ( - velocity.x ) * 0.08 * delta;
-        //velocity.z += ( - velocity.z ) * 0.08 * delta;
+        velocity.x += ( - velocity.x ) * 0.08 * delta;
+        velocity.z += ( - velocity.z ) * 0.08 * delta;
 
-        //velocity.y -= 0.25 * delta;
+        //velocity.y -= 0.025 * delta;
 
         if ( moveForward ) velocity.z -= 0.012 * delta;
         if ( moveBackward ) velocity.z += 0.012 * delta;
@@ -514,9 +514,11 @@ console.log("YES");
         yawObject.translateX( velocity.x );
         yawObject.translateZ( velocity.z );
         yawObject.position.y= getH(yawObject.position.x ,yawObject.position.z); 
-    };
+        checkPos(yawObject);
 
+    };
 };
+
  var Bird = function () {
 
     var scope = this;
@@ -1022,8 +1024,9 @@ var Boid = function() {
 
         var sprite1,uniforms=null;
         var sprite2=null;
-        var myPos = { 'x':2,'y':4,'z':5};
+        var myPos = { 'x':0,'y':1,'z':0};
         var sphere = null;
+        var android = null;
     
 
 var camera, scene, renderer;
@@ -1311,8 +1314,23 @@ sphere = new THREE.Mesh(
   sphereMaterial);
 
 // add the sphere to the scene
-scene.add(sphere);
+//scene.add(sphere);
+    var jsonLoader = new THREE.JSONLoader();
+    jsonLoader.load( "android.js", addModelToScene );
 
+
+function addModelToScene( geometry, materials ) 
+{
+    // for preparing animation
+    for (var i = 0; i < materials.length; i++)
+        materials[i].morphTargets = true;
+        
+    var material = new THREE.MeshFaceMaterial( materials );
+    android = new THREE.Mesh( geometry, material );
+    android.scale.set(.1,.1,.1);
+    android.position.y = getH(0 ,0);
+    scene.add( android );
+}
             var waterWidth = 1024, waterDepth = 1024;
             var worldWidth = 256, worldDepth = 256,
             data = groundGeometry;
@@ -1453,7 +1471,7 @@ function replacer(key, value) {
 }
 
 
-function checkPos(){
+function checkPos(camera){
     var willsend=false;
     if ((Math.floor(camera.position.x)<myPos.x) || (Math.floor(camera.position.x)>myPos.x)){
         myPos.x=Math.floor(camera.position.x);
@@ -1487,10 +1505,10 @@ if (prop2='y')
 if (prop2='z')
     zc=tt[prop2];
 }
-sphere.position.x=xc;
-sphere.position.y=yc;
-sphere.position.z=zc;
- console.log   (sphere.geometry.x);
+android.position.x=xc;
+android.position.y=yc;
+android.position.z=zc;
+ console.log   (android.geometry.x);
  }
        lastpos=myJSONUserPosArray2[prop]
 
@@ -1531,7 +1549,6 @@ sphere.position.z=zc;
             camera.position.y = getH(camera.position.x ,camera.position.z)+3;
 
             camera.lookAt( scene.position );*/
-checkPos();
             renderer.render( scene, camera );
 
         }

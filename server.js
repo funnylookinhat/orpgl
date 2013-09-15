@@ -299,6 +299,7 @@ createnature();
 fu.get("/", fu.staticHandler("index.html"));
 fu.get("/styles.css", fu.staticHandler("styles.css"));
 fu.get("/client.js", fu.staticHandler("client.js"));
+fu.get("/android.js", fu.staticHandler("android.js"));
 fu.get("/jquery-1.2.6.min.js", fu.staticHandler("jquery-1.2.6.min.js"));
 fu.get("/three.js", fu.staticHandler("three.js"));
 fu.get("/branch1.png", fu.staticHandler("branch1.png"));
