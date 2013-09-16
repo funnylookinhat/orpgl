@@ -972,17 +972,65 @@ var Boid = function() {
                 value: [] // an empty array
             }
         };
+        var attributesS8 = {
+            displacement3: {
+                type: 'f', // a float
+                value: [] // an empty array
+            }
+        };
+        var attributesS9 = {
+            displacement4: {
+                type: 'f', // a float
+                value: [] // an empty array
+            }
+        };
+        var attributesS10 = {
+            displacement5: {
+                type: 'f', // a float
+                value: [] // an empty array
+            }
+        };
+        var attributesS11 = {
+            displacement6: {
+                type: 'f', // a float
+                value: [] // an empty array
+            }
+        };
             
         // now populate the array of attributes
         var valuesS6 = attributesS6.displacement.value;
         // now populate the array of attributes
         var valuesS7 = attributesS7.displacement2.value;
         
+        // now populate the array of attributes
+        var valuesS8 = attributesS8.displacement3.value;
+        
+        // now populate the array of attributes
+        var valuesS9 = attributesS9.displacement4.value;
+        
+        // now populate the array of attributes
+        var valuesS10 = attributesS10.displacement5.value;
+        
+        // now populate the array of attributes
+        var valuesS11 = attributesS11.displacement6.value;
+        
         for(var v = 0; v < 128; v++) {
             valuesS6.push(Math.random() * 30);
         }
         for(var v = 0; v < 128; v++) {
             valuesS7.push(Math.random() * 30);
+        }
+        for(var v = 0; v < 128; v++) {
+            valuesS8.push(Math.random() * 30);
+        }
+        for(var v = 0; v < 128; v++) {
+            valuesS9.push(Math.random() * 30);
+        }
+        for(var v = 0; v < 128; v++) {
+            valuesS10.push(Math.random() * 30);
+        }
+        for(var v = 0; v < 128; v++) {
+            valuesS11.push(Math.random() * 30);
         }
         
         var uniformsS6 = {
@@ -993,6 +1041,30 @@ var Boid = function() {
         };
         var uniformsS7 = {
             amplitude2: {
+                type: 'f', // a float
+                value: 0
+            }
+        };
+        var uniformsS8 = {
+            amplitude3: {
+                type: 'f', // a float
+                value: 0
+            }
+        };
+        var uniformsS9 = {
+            amplitude4: {
+                type: 'f', // a float
+                value: 0
+            }
+        };
+        var uniformsS10 = {
+            amplitude5: {
+                type: 'f', // a float
+                value: 0
+            }
+        };
+        var uniformsS11 = {
+            amplitude6: {
                 type: 'f', // a float
                 value: 0
             }
@@ -1021,6 +1093,10 @@ var Boid = function() {
 
         var sprite1,uniforms=null;
         var sprite2=null;
+        var sprite3=null;
+        var sprite4=null;
+        var sprite5=null;
+        var sprite6=null;
         var myPos = { 'x':0,'y':1,'z':0};
         var sphere = null;
         var android = null;
@@ -1071,7 +1147,55 @@ var Boid = function() {
             alert('Your browser doesn\'t seem to support Pointer Lock API');
         }
 
+var grassMesh, grassGeometry, grassMaterial;
+            var grassCount = 50000;
 
+            function generateRandomGrassLeaf( material ) {
+                var geometry = new THREE.Geometry(),
+                    dir = (Math.random() > 0.5) ? 1.0 : -1.0,
+                    offset = Math.random() * 0.5 + 0.2,
+                    factor = Math.random() * 2 + 1;
+                geometry.vertices.push( new THREE.Vector3(   0, 0, dir * factor * Math.pow( offset, 5 ) ) );
+                geometry.vertices.push( new THREE.Vector3(   1, 0, dir * factor * Math.pow( offset, 5 ) ) );
+                geometry.vertices.push( new THREE.Vector3( 0.1, 1, dir * factor * Math.pow( offset, 4 ) ) );
+                geometry.vertices.push( new THREE.Vector3( 0.8, 2, dir * factor * Math.pow( offset, 3 ) ) );
+                geometry.vertices.push( new THREE.Vector3( 0.3, 3, dir * factor * Math.pow( offset, 2 ) ) );
+                geometry.vertices.push( new THREE.Vector3( 0.5, 4, dir * factor * Math.pow( offset, 1 ) ) );
+                geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
+                geometry.faces.push( new THREE.Face3( 1, 3, 2 ) );
+                geometry.faces.push( new THREE.Face3( 2, 3, 4 ) );
+                geometry.faces.push( new THREE.Face3( 3, 5, 4 ) );
+                function generateGrassColor() {
+                    return new THREE.Color().setRGB( Math.random() * 0.1 + 0.1, Math.random() * 0.3 + 0.3, Math.random() * 0.2 + 0.1 );
+                }
+                geometry.faces[0].vertexColors[0] = generateGrassColor();
+                geometry.faces[0].vertexColors[1] = generateGrassColor();
+                geometry.faces[0].vertexColors[2] = generateGrassColor();
+                geometry.faces[1].vertexColors[0] = geometry.faces[0].vertexColors[1];
+                geometry.faces[1].vertexColors[1] = generateGrassColor();
+                geometry.faces[1].vertexColors[2] = geometry.faces[0].vertexColors[2];
+                geometry.faces[2].vertexColors[0] = geometry.faces[1].vertexColors[2];
+                geometry.faces[2].vertexColors[1] = geometry.faces[1].vertexColors[1];
+                geometry.faces[2].vertexColors[2] = generateGrassColor();
+                geometry.faces[3].vertexColors[0] = geometry.faces[2].vertexColors[1]
+                geometry.faces[3].vertexColors[1] = generateGrassColor();
+                geometry.faces[3].vertexColors[2] = geometry.faces[2].vertexColors[2];
+                
+                var mesh = new THREE.Mesh( geometry, material );
+                mesh.scale.set(0.2, Math.random() * 0.2 + 0.2, 0.2);
+                mesh.position.x = Math.round(Math.random() * 256-128);
+                mesh.position.z = Math.round(Math.random() * 256-128);
+                var i=0;
+                var h = 0;
+                h = getH(mesh.position.x ,mesh.position.z);
+                if (h>1) {
+                    h=-1000;
+
+                }
+                mesh.position.y = h;
+                mesh.rotation.y = Math.random();
+                return mesh;
+            }
         init();
         animate();
 
@@ -1147,25 +1271,29 @@ function loadtrees(loader,branchfactor,levels,leafsprite,iduni,idxstart,idxend,a
 
                        "    vec3 color = texture2D( "+previousRender+", glTexCoord ).rgb;",
 
-                       "    color += texture2D( "+leafsprite+", glTexCoord ).rgb;",
+                       "    color = texture2D( "+leafsprite+", glTexCoord ).rgb;",
 
                        "    gl_FragColor.rgb = color;",
-                       "    gl_FragColor.a = 1.0;",
-
+                       
+ "if (gl_FragColor.g < 0.1)",
+                       "    discard;",
+                       
+                                              "    gl_FragColor.a = 1.0;",
+/*
                         "if (gl_FragColor.r < 0.05)",
                        "    discard;",
                         "if (gl_FragColor.g < 0.05)",
                        "    discard;",
                         "if (gl_FragColor.b < 0.05)",
                        "   discard;",
-                       
+                     
                         "if ((gl_FragColor.r < 0.12)&&(gl_FragColor.r >= 0.1))",
                        "    gl_FragColor.a = 0.5;",
                         "if ((gl_FragColor.g < 0.12)&&(gl_FragColor.g >= 0.1))",
                        "    gl_FragColor.a = 0.5;",
                         "if ((gl_FragColor.b < 0.12)&&(gl_FragColor.b >= 0.1))",
                        "    gl_FragColor.a = 0.5;",
-
+*/
                                "}"].join("\n")
                 }
             };
@@ -1196,16 +1324,17 @@ function loadtrees(loader,branchfactor,levels,leafsprite,iduni,idxstart,idxend,a
 
 function funcdt() {     
     var loader = new THREE.JSONLoader();
-    loadtrees(loader,3.4,5,'sprite1',1,0,49,"amplitude","previousRender",attributesS6,"displacement"   );
-    loadtrees(loader,6,20,'sprite2',2,50,99,"amplitude2","previousRender2",attributesS7,"displacement2");
-    loadtrees(loader,7,10,'sprite2',2,100,199,"amplitude2","previousRender2",attributesS7,"displacement2",267,8,0.6,0.7,0.26,0.94,0.7,0.556,0.404);
-    loadtrees(loader,5,30,'sprite2',2,200,399,"amplitude2","previousRender2",attributesS7,"displacement2",300,4,0.3,0.7,0.26,0.9,0.3,0.15,0.404);
-    loadtrees(loader,8,60,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2",540,10,0.9,0.7,0.2,0.4,0.7,0.556,0.404);
+    loadtrees(loader,3.4,5,'sprite1',1,0,199,"amplitude","previousRender",attributesS6,"displacement"   );
+    loadtrees(loader,6,20,'sprite2',2,200,500,"amplitude2","previousRender2",attributesS7,"displacement2");
 }
 function init() {
 
     sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
     sprite2 = THREE.ImageUtils.loadTexture( "branch2.png", null );
+    sprite3 = THREE.ImageUtils.loadTexture( "branch3.png", null );
+    sprite4 = THREE.ImageUtils.loadTexture( "branch4.png", null );
+    sprite5 = THREE.ImageUtils.loadTexture( "branch5.png", null );
+    sprite6 = THREE.ImageUtils.loadTexture( "branch6.png", null );
    
     container = document.createElement( 'div' );
     document.body.appendChild( container );
@@ -1229,12 +1358,39 @@ function init() {
                     type: 'f', // a float
                     value: 0
                 }
+            }; camera.uniforms[3]=  {
+                sprite3: { type: "t", value: sprite3 },
+                previousRender3: { type: "t", value: null },
+                amplitude3: {
+                    type: 'f', // a float
+                    value: 0
+                }
+            }; camera.uniforms[4]=  {
+                sprite4: { type: "t", value: sprite4 },
+                previousRender4: { type: "t", value: null },
+                amplitude4: {
+                    type: 'f', // a float
+                    value: 0
+                }
+            }; camera.uniforms[5]=  {
+                sprite5: { type: "t", value: sprite5 },
+                previousRender5: { type: "t", value: null },
+                amplitude5: {
+                    type: 'f', // a float
+                    value: 0
+                }
+            }; camera.uniforms[6]=  {
+                sprite6: { type: "t", value: sprite6 },
+                previousRender6: { type: "t", value: null },
+                amplitude6: {
+                    type: 'f', // a float
+                    value: 0
+                }
             };
     scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2( 0xB4E4F4, 0.0025 );
     controls = new THREE.PointerLockControls( camera );
     scene.add( controls.getObject() );
-
 
 /*
 
@@ -1328,6 +1484,13 @@ function init() {
     
     }
 
+grassMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, side: THREE.DoubleSide } );
+                grassGeometry = new THREE.Geometry();
+                for ( var i = 0, l = grassCount; i < l; i++ ) {
+                    THREE.GeometryUtils.merge(grassGeometry, generateRandomGrassLeaf( grassMaterial ) );
+                }
+                grassMesh = new THREE.Mesh( grassGeometry, grassMaterial );
+                scene.add(grassMesh);
     var floorTexture = new THREE.ImageUtils.loadTexture( 'texture.jpg' );
     floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
     floorTexture.repeat.set( 5, 5 );
@@ -1405,11 +1568,18 @@ function onWindowResize( event ) {
         if ( t > 30 ) t = 0;
 
         var delta = clock.getDelta();
+for ( var i = 0, il = grassGeometry.vertices.length / 2 - 1; i <= il; i ++ ) {
+                    for ( var j = 0, jl = 2, f = (il - i) / il; j < jl; j++ ) {
+                        //grassGeometry.vertices[ jl * i + j ].z = f * Math.sin(time) / 200
+                    }
+                }
 
+                grassGeometry.verticesNeedUpdate = true;
         if (don==false && morphs.length>0) dod();
         
 
         controls.update( Date.now() - time );
+        //time = Date.now() - time ;
         render();
         
     }
@@ -1501,6 +1671,10 @@ function render() {
 */
     camera.uniforms[1].amplitude.value = 3*Math.sin(frame)+Math.cos(frame);
     camera.uniforms[2].amplitude2.value = 3*Math.sin(frame)+Math.cos(frame);
+    camera.uniforms[3].amplitude3.value = 3*Math.sin(frame)+Math.cos(frame);
+    camera.uniforms[4].amplitude4.value = 3*Math.sin(frame)+Math.cos(frame);
+    camera.uniforms[5].amplitude5.value = 3*Math.sin(frame)+Math.cos(frame);
+    camera.uniforms[6].amplitude6.value = 3*Math.sin(frame)+Math.cos(frame);
     frame += 0.04;
     renderer.render( scene, camera );
 

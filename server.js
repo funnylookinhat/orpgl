@@ -266,35 +266,30 @@ function createnature() {
     s= "var naturePos="+JSON.stringify(Array(nature['posX'],nature['posY']), undefined, 2)+';'
     s+= "var groundGeometry="+JSON.stringify(dataground)+';';
 
-fs.writeFile("nature.js", s); 
+    fs.writeFile("nature.js", s); 
 }
 
 function loaddir(path, callback) {
-      fs.readdir(path, function (err, filenames) {
-        if (err) { return; }
-        var realfiles = [];
-        var count = filenames.length;
-        filenames.forEach(function (filename) {
-if ((path.indexOf("svn")==-1)&&(filename.indexOf("svn")==-1)){
-		console.log("oco  : " + path+'/'+filename);                     
-		fu.get('/'+path+'/'+filename, fu.staticHandler(path+'/'+filename));
-		realfiles.push(filename);
-
-        loaddir(path+'/'+filename, callback);}
-
+  fs.readdir(path, function (err, filenames) {
+    if (err) { return; }
+    var realfiles = [];
+    var count = filenames.length;
+    filenames.forEach(function (filename) {
+      if ((path.indexOf("svn")==-1)&&(filename.indexOf("svn")==-1)){
+    		console.log("loading file " + path+'/'+filename);                     
+    		fu.get('/'+path+'/'+filename, fu.staticHandler(path+'/'+filename));
+    		realfiles.push(filename);
+        loaddir(path+'/'+filename, callback);
+      }
     });
-    });
-    }
+  });
+}
 
 
-console.log("loading folder "+appfolder+" ...");
+console.log("loading folder "+appfolder);
 loaddir(appfolder);
-createnature();
-//console.log("creating nature ...");
-//createnature(trees,30);
-//createnature(bush,50);
-//createnature(branch,30);
 
+createnature();
 
 fu.get("/", fu.staticHandler("index.html"));
 fu.get("/styles.css", fu.staticHandler("styles.css"));
@@ -309,14 +304,6 @@ fu.get("/texture.jpg", fu.staticHandler("texture.jpg"));
 
 fu.get("/nature.js", fu.staticHandler("nature.js"));
 
-fs.writeFile("/tmp/test", "Hey there!", function(err) {
-    if(err) {
-        console.log(err);
-    } else {
-        console.log("The file was saved!");
-    }
-}); 
-
 fu.get("/who", function (req, res) {
   var nicks = [];
   for (var id in sessions) {
@@ -326,13 +313,6 @@ fu.get("/who", function (req, res) {
   }
   res.simpleJSON(200, { nicks: nicks
                       });
-});
-
-fu.get("/getnature", function (req, res) {
-  res.simpleJSON(200, { nature: nature
-                      });
-  console.log("sending nature data");
-
 });
 
 fu.get("/join", function (req, res) {

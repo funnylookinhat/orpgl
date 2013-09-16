@@ -280,15 +280,6 @@ function showChat (nick) {
 
 }
 
-//we want to show a count of unread messages when the window does not have focus
-function updateTitle(){
-  if (CONFIG.unread) {
-    document.title = "(" + CONFIG.unread.toString() + ") node chat";
-  } else {
-    document.title = "node chat";
-  }
-}
-
 var starttime;
 
 function onConnect (session) {
@@ -309,18 +300,6 @@ $("#canvas").css({"height":"300px","width":"600px"})
   //update the UI to show the chat
   showChat(CONFIG.nick);
 
-  //listen for browser events so we know to update the document title
-  $(window).bind("blur", function() {
-    CONFIG.focus = false;
-    updateTitle();
-  });
-
-  $(window).bind("focus", function() {
-    CONFIG.focus = true;
-    CONFIG.unread = 0;
-    updateTitle();
-  });
-  
   jQuery.get("/who", {}, function (data, status) {
     if (status != "success") return;
     ns = String(data.nicks);
