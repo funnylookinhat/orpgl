@@ -513,7 +513,7 @@ console.log("YES");
 
         yawObject.translateX( velocity.x );
         yawObject.translateZ( velocity.z );
-        yawObject.position.y= getH(yawObject.position.x ,yawObject.position.z); 
+        yawObject.position.y= getH(yawObject.position.x ,yawObject.position.z)+.5; 
         checkPos(yawObject);
 
     };
@@ -1166,7 +1166,7 @@ var grassMesh, grassGeometry, grassMaterial;
                 geometry.faces.push( new THREE.Face3( 2, 3, 4 ) );
                 geometry.faces.push( new THREE.Face3( 3, 5, 4 ) );
                 function generateGrassColor() {
-                    return new THREE.Color().setRGB( Math.random() * 0.1 + 0.1, Math.random() * 0.3 + 0.3, Math.random() * 0.2 + 0.1 );
+                    return new THREE.Color().setRGB( Math.random() * 0.1 + 0.1, Math.random() * 0.5 + offset - 0.3, Math.random() * 0.2 + 0.1 );
                 }
                 geometry.faces[0].vertexColors[0] = generateGrassColor();
                 geometry.faces[0].vertexColors[1] = generateGrassColor();
@@ -1182,12 +1182,12 @@ var grassMesh, grassGeometry, grassMaterial;
                 geometry.faces[3].vertexColors[2] = geometry.faces[2].vertexColors[2];
                 
                 var mesh = new THREE.Mesh( geometry, material );
-                mesh.scale.set(0.2, Math.random() * 0.2 + 0.2, 0.2);
+                mesh.scale.set(0.3, Math.random() * 0.3 + 0.3, 0.3);
                 mesh.position.x = Math.round(Math.random() * 256-128);
                 mesh.position.z = Math.round(Math.random() * 256-128);
                 var i=0;
                 var h = 0;
-                h = getH(mesh.position.x ,mesh.position.z);
+                h = getH(mesh.position.x ,mesh.position.z)-0.5;
                 if (h>1) {
                     h=-1000;
 
