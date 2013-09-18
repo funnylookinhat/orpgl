@@ -357,6 +357,9 @@ THREE.Euler.prototype = {
     }
 
 };
+
+var yawObject,nh;
+
 THREE.PointerLockControls = function ( camera ) {
 console.log("YES");
 
@@ -367,8 +370,8 @@ console.log("YES");
     var pitchObject = new THREE.Object3D();
     pitchObject.add( camera );
 
-    var yawObject = new THREE.Object3D();
-    yawObject.position.y = 10;
+    yawObject = new THREE.Object3D();
+    yawObject.position.y = 0;
     yawObject.add( pitchObject );
 
     var moveForward = false;
@@ -513,7 +516,13 @@ console.log("YES");
 
         yawObject.translateX( velocity.x );
         yawObject.translateZ( velocity.z );
-        yawObject.position.y= getH(yawObject.position.x ,yawObject.position.z)+.5; 
+        nh =getH(yawObject.position.x ,yawObject.position.z)+.5;
+        if (yawObject.position.y < nh && (yawObject.position.y - nh) < -.01)
+        yawObject.translateY( .1 )
+        if (yawObject.position.y > nh && (yawObject.position.y - nh) > .01)
+        yawObject.translateY( -.1 ); 
+     console.log((nh - yawObject.position.y));
+
         checkPos(yawObject);
 
     };
@@ -1183,15 +1192,19 @@ var grassMesh, grassGeometry, grassMaterial;
                 
                 var mesh = new THREE.Mesh( geometry, material );
                 mesh.scale.set(0.3, Math.random() * 0.3 + 0.3, 0.3);
-                mesh.position.x = Math.round(Math.random() * 256-128);
-                mesh.position.z = Math.round(Math.random() * 256-128);
+                mesh.position.x = Math.round(Math.random() * 240-120);
+                mesh.position.z = Math.round(Math.random() * 240-120);
                 var i=0;
                 var h = 0;
                 h = getH(mesh.position.x ,mesh.position.z)-0.5;
-                if (h>1) {
-                    h=-1000;
+                if (h<10&&h>-3) {
+                
+                   mesh.scale.set(0.1, Math.random() * 0.1 + 0.1, 0.1);                
+                }
+                else if (h<-5) {
 
                 }
+                else {h=-1000}
                 mesh.position.y = h;
                 mesh.rotation.y = Math.random();
                 return mesh;
@@ -1325,7 +1338,8 @@ function loadtrees(loader,branchfactor,levels,leafsprite,iduni,idxstart,idxend,a
 function funcdt() {     
     var loader = new THREE.JSONLoader();
     loadtrees(loader,3.4,5,'sprite1',1,0,199,"amplitude","previousRender",attributesS6,"displacement"   );
-    loadtrees(loader,6,20,'sprite2',2,200,500,"amplitude2","previousRender2",attributesS7,"displacement2");
+        loadtrees(loader,3.4,5,'sprite1',1,200,399,"amplitude","previousRender",attributesS6,"displacement",10,10,3,1);
+    loadtrees(loader,6,20,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2");
 }
 function init() {
 
