@@ -1211,6 +1211,7 @@ var grassMesh, grassGeometry, grassMaterial;
             }
         init();
         animate();
+        composer.render(0.05);
 
 function loadtrees(loader,branchfactor,levels,leafsprite,iduni,idxstart,idxend,amplitude,previousRender,attributes,displacement,seed,segments,vMultiplier,twigScale,initalBranchLength,lengthFalloffFactor,lengthFalloffPower,clumpMax,clumpMin){
 
@@ -1282,31 +1283,10 @@ function loadtrees(loader,branchfactor,levels,leafsprite,iduni,idxstart,idxend,a
 
                        "void main() {",
 
-                       "    vec3 color = texture2D( "+previousRender+", glTexCoord ).rgb;",
-
-                       "    color = texture2D( "+leafsprite+", glTexCoord ).rgb;",
-
-                       "    gl_FragColor.rgb = color;",
-                       
- "if (gl_FragColor.g < 0.1)",
-                       "    discard;",
-                       
-                                              "    gl_FragColor.a = 1.0;",
-/*
-                        "if (gl_FragColor.r < 0.05)",
-                       "    discard;",
-                        "if (gl_FragColor.g < 0.05)",
-                       "    discard;",
-                        "if (gl_FragColor.b < 0.05)",
-                       "   discard;",
-                     
-                        "if ((gl_FragColor.r < 0.12)&&(gl_FragColor.r >= 0.1))",
-                       "    gl_FragColor.a = 0.5;",
-                        "if ((gl_FragColor.g < 0.12)&&(gl_FragColor.g >= 0.1))",
-                       "    gl_FragColor.a = 0.5;",
-                        "if ((gl_FragColor.b < 0.12)&&(gl_FragColor.b >= 0.1))",
-                       "    gl_FragColor.a = 0.5;",
-*/
+                       "    vec3 color = texture2D( "+leafsprite+", glTexCoord ).rgb;",
+                    "    gl_FragColor.rgb = color;",   
+                    "if (gl_FragColor.g < 0.1)",
+                    "    discard;",
                                "}"].join("\n")
                 }
             };
@@ -1315,7 +1295,8 @@ function loadtrees(loader,branchfactor,levels,leafsprite,iduni,idxstart,idxend,a
                 attributes:     attributes,
                         uniforms: camera.uniforms[iduni],
                 vertexShader:   Shaders.LitAttributeAnimated.vertex,
-                fragmentShader: Shaders.LitAttributeAnimated.fragment
+                fragmentShader: Shaders.LitAttributeAnimated.fragment,
+                fog:true
             });
             
 
@@ -1341,6 +1322,7 @@ function funcdt() {
         loadtrees(loader,3.4,5,'sprite1',1,200,399,"amplitude","previousRender",attributesS6,"displacement",10,10,3,1);
     loadtrees(loader,6,20,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2");
 }
+var composer, dpr, effectFXAA, renderScene;
 function init() {
 
     sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
@@ -1356,14 +1338,25 @@ function init() {
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
 
     camera.position.set( myPos.x,myPos.y,myPos.z);
-    camera.uniforms=new Array();
+     scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2( 0xB4E4F4, 0.0025 );
+    
+camera.uniforms=new Array();
     camera.uniforms[1]=  {
               sprite1: { type: "t", value: sprite1 },
                 previousRender: { type: "t", value: null },
                 amplitude: {
                     type: 'f', // a float
                     value: 0
-                }
+                },
+                    
+    topColor:    { type: "c", value: new THREE.Color( 0x0077ff ) },
+    bottomColor: { type: "c", value: new THREE.Color( 0xffffff ) },
+    offset:      { type: "f", value: 33 },
+    exponent:    { type: "f", value: 0.6 },
+    fogColor:    { type: "c", value: scene.fog.color },
+    fogNear:     { type: "f", value: scene.fog.near },
+    fogFar:      { type: "f", value: scene.fog.far },fogDensity:      { type: "f", value: 100 }
             };
     camera.uniforms[2]=  {
                 sprite2: { type: "t", value: sprite2 },
@@ -1371,41 +1364,123 @@ function init() {
                 amplitude2: {
                     type: 'f', // a float
                     value: 0
-                }
+                },
+                    
+    topColor:    { type: "c", value: new THREE.Color( 0x0077ff ) },
+    bottomColor: { type: "c", value: new THREE.Color( 0xffffff ) },
+    offset:      { type: "f", value: 33 },
+    exponent:    { type: "f", value: 0.6 },
+    fogColor:    { type: "c", value: scene.fog.color },
+    fogNear:     { type: "f", value: scene.fog.near },
+    fogFar:      { type: "f", value: scene.fog.far },fogDensity:      { type: "f", value: 100 }
             }; camera.uniforms[3]=  {
                 sprite3: { type: "t", value: sprite3 },
                 previousRender3: { type: "t", value: null },
                 amplitude3: {
                     type: 'f', // a float
                     value: 0
-                }
+                },
+                    
+    topColor:    { type: "c", value: new THREE.Color( 0x0077ff ) },
+    bottomColor: { type: "c", value: new THREE.Color( 0xffffff ) },
+    offset:      { type: "f", value: 33 },
+    exponent:    { type: "f", value: 0.6 },
+    fogColor:    { type: "c", value: scene.fog.color },
+    fogNear:     { type: "f", value: scene.fog.near },
+    fogFar:      { type: "f", value: scene.fog.far },fogDensity:      { type: "f", value: 100 }
             }; camera.uniforms[4]=  {
                 sprite4: { type: "t", value: sprite4 },
                 previousRender4: { type: "t", value: null },
                 amplitude4: {
                     type: 'f', // a float
                     value: 0
-                }
+                },
+                    
+    topColor:    { type: "c", value: new THREE.Color( 0x0077ff ) },
+    bottomColor: { type: "c", value: new THREE.Color( 0xffffff ) },
+    offset:      { type: "f", value: 33 },
+    exponent:    { type: "f", value: 0.6 },
+    fogColor:    { type: "c", value: scene.fog.color },
+    fogNear:     { type: "f", value: scene.fog.near },
+    fogFar:      { type: "f", value: scene.fog.far },fogDensity:      { type: "f", value: 100 }
             }; camera.uniforms[5]=  {
                 sprite5: { type: "t", value: sprite5 },
                 previousRender5: { type: "t", value: null },
                 amplitude5: {
                     type: 'f', // a float
                     value: 0
-                }
+                },
+                    
+    topColor:    { type: "c", value: new THREE.Color( 0x0077ff ) },
+    bottomColor: { type: "c", value: new THREE.Color( 0xffffff ) },
+    offset:      { type: "f", value: 33 },
+    exponent:    { type: "f", value: 0.6 },
+    fogColor:    { type: "c", value: scene.fog.color },
+    fogNear:     { type: "f", value: scene.fog.near },
+    fogFar:      { type: "f", value: scene.fog.far },fogDensity:      { type: "f", value: 100 }
             }; camera.uniforms[6]=  {
                 sprite6: { type: "t", value: sprite6 },
                 previousRender6: { type: "t", value: null },
                 amplitude6: {
                     type: 'f', // a float
                     value: 0
-                }
+                },
+                    
+    topColor:    { type: "c", value: new THREE.Color( 0x0077ff ) },
+    bottomColor: { type: "c", value: new THREE.Color( 0xffffff ) },
+    offset:      { type: "f", value: 33 },
+    exponent:    { type: "f", value: 0.6 },
+    fogColor:    { type: "c", value: scene.fog.color },
+    fogNear:     { type: "f", value: scene.fog.near },
+    fogFar:      { type: "f", value: scene.fog.far },fogDensity:      { type: "f", value: 100 }
             };
-    scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2( 0xB4E4F4, 0.0025 );
+   
+
     controls = new THREE.PointerLockControls( camera );
     scene.add( controls.getObject() );
 
+
+
+dpr = 1;
+if (window.devicePixelRatio !== undefined) {
+  dpr = window.devicePixelRatio;
+}
+
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setClearColor(new THREE.Color(0xB4E4F4));
+var renderModel = new THREE.RenderPass( scene, camera );
+                var effectBloom = new THREE.BloomPass( 1 );
+//                var effectBloom = new THREE.BloomPass( 1, 25, 16, 128 );
+
+                effectBloom.clear = true;
+                var effectCopy = new THREE.ShaderPass( THREE.CopyShader );
+
+                effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
+
+                var width = window.innerWidth || 2;
+                var height = window.innerHeight || 2;
+
+                effectFXAA.uniforms[ 'resolution' ].value.set( 1 / width, 1 / height );
+
+                effectCopy.renderToScreen = true;
+
+                composer = new THREE.EffectComposer( renderer );
+
+                composer.addPass( renderModel );
+                composer.addPass( effectFXAA );
+                //composer.addPass( effectBloom );
+                composer.addPass( effectCopy );
+/*renderScene = new THREE.RenderPass(scene, camera);
+effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
+effectFXAA.uniforms['resolution'].value.set(1 / (window.innerWidth * dpr), 1 / (window.innerHeight * dpr));
+effectFXAA.renderToScreen = true;
+
+composer = new THREE.EffectComposer(renderer);
+composer.setSize(window.innerWidth * dpr, window.innerHeight * dpr);
+composer.addPass(renderScene);
+composer.addPass(effectFXAA);
+*/
 /*
 
     controls = new THREE.PointerLockControls( camera );
@@ -1521,9 +1596,6 @@ grassMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, verte
     directionalLight.position.set(1, 1, 1).normalize();
     scene.add(directionalLight);
 
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    renderer.setClearColor(new THREE.Color(0xB4E4F4));
     container.appendChild( renderer.domElement );
 
     window.addEventListener( 'resize', onWindowResize, false );
@@ -1690,7 +1762,15 @@ function render() {
     camera.uniforms[5].amplitude5.value = 3*Math.sin(frame)+Math.cos(frame);
     camera.uniforms[6].amplitude6.value = 3*Math.sin(frame)+Math.cos(frame);
     frame += 0.04;
-    renderer.render( scene, camera );
+/*    var antialias = gl.getContextAttributes().antialias;
+
+var size = gl.getParameter(gl.SAMPLES);
+alert(size);
+*/
+                renderer.clear();
+                composer.render();
+
+//    renderer.render( scene, camera );
 
 }
 

@@ -285,9 +285,11 @@ function loaddir(path, callback) {
   });
 }
 
-
+var jslibs = 'js'
 console.log("loading folder "+appfolder);
 loaddir(appfolder);
+console.log("loading folder "+jslibs);
+loaddir(jslibs);
 
 createnature();
 
