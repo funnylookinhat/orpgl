@@ -1216,9 +1216,11 @@ var grassMesh, grassGeometry, grassMaterial;
 function loadtrees(loader,branchfactor,levels,leafsprite,iduni,idxstart,idxend,amplitude,previousRender,attributes,displacement,seed,segments,vMultiplier,twigScale,initalBranchLength,lengthFalloffFactor,lengthFalloffPower,clumpMax,clumpMin){
 
     url = 'http://localhost:8080/tree?leaves=0&levels='+levels+'&branchfactor='+branchfactor
-    if (seed != undefined)
-    url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale='+twigScale
+    if (seed != undefined) {
+        url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale='+twigScale
+    }
     //+'&initalBranchLength='+initalBranchLength+'&lengthFalloffFactor='+lengthFalloffFactor+'&lengthFalloffPower='+lengthFalloffPower+'&clumpMax='+clumpMax+'&clumpMin='+clumpMin
+
     c = loader.load( url, function ( geometry, materials ) {
         var material = materials[ 0 ];
         material.color.setHex( 0xffffff );
@@ -1250,8 +1252,12 @@ function loadtrees(loader,branchfactor,levels,leafsprite,iduni,idxstart,idxend,a
         var material = materials[ 0 ];
         material.color.setHex( 0xffffff );
         material.ambient.setHex( 0xffffff );
-        material.alphaTest = 0.5;
+        material.alp
+        haTest = 0.5;
 
+var materialr = new THREE.MeshLambertMaterial({
+        map: sprite1,opacity: 0.9, transparent: true , depthWrite: false, depthTest: true
+      });
         var faceMaterial = new THREE.MeshFaceMaterial( materials );
 
         for ( var i = idxstart; i < idxend; i ++ ) {
@@ -1300,7 +1306,7 @@ function loadtrees(loader,branchfactor,levels,leafsprite,iduni,idxstart,idxend,a
             });
             
 
-            morph2 = new THREE.Mesh( geometry, shaderMaterial );
+            morph2 = new THREE.Mesh( geometry, materialr );
 
             var s = THREE.Math.randFloat( 0.00075, 0.001 );
             morph2.scale.set( s, s, s );
