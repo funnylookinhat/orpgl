@@ -1338,7 +1338,11 @@ function init() {
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
 
     camera.position.set( myPos.x,myPos.y,myPos.z);
-     scene = new THREE.Scene();
+
+Physijs.scripts.worker = 'physijs_worker.js';
+Physijs.scripts.ammo = 'ammo.js';
+scene = new Physijs.Scene;
+//       scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2( 0xB4E4F4, 0.0025 );
     
 camera.uniforms=new Array();
