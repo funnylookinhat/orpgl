@@ -532,7 +532,7 @@ THREE.PointerLockControls = function ( camera ) {
 
         yawObject.translateX( velocity.x );
         yawObject.translateZ( velocity.z );
-        nh =getH(yawObject.position.x ,yawObject.position.z)+.5;
+        nh =getH(yawObject.position.x ,-yawObject.position.z)+.5;
         if (yawObject.position.y < nh && (yawObject.position.y - nh) < -.01)
         yawObject.translateY( .1 )
         if (yawObject.position.y > nh && (yawObject.position.y - nh) > .01)
@@ -1212,7 +1212,7 @@ var grassMesh, grassGeometry, grassMaterial;
                 mesh.position.z = Math.round(Math.random() * 240-120);
                 var i=0;
                 var h = 0;
-                h = getH(mesh.position.x ,mesh.position.z)-0.5;
+                h = getH(mesh.position.x ,-mesh.position.z)-0.5;
                 if (h<10&&h>-3) {
                 
                    mesh.scale.set(0.1, Math.random() * 0.1 + 0.1, 0.1);                
@@ -1235,7 +1235,8 @@ var grassMesh, grassGeometry, grassMaterial;
         var material = materials[ 0 ];
         material.color.setHex( 0xffffff );
         material.ambient.setHex( 0xffffff );
-        var faceMaterial = new THREE.MeshFaceMaterial( materials );
+//        var faceMaterial = new THREE.MeshFaceMaterial( materials );
+        var faceMaterial = new THREE.MeshBasicMaterial({ map:THREE.ImageUtils.loadTexture( 'texture.jpg')});
 
         for ( var i = idxstart; i < idxend; i ++ ) {
             var x = naturePos[0][i];
@@ -1245,7 +1246,7 @@ var grassMesh, grassGeometry, grassMaterial;
             var s = THREE.Math.randFloat( 0.00075, 0.001 );
             morph.scale.set( s, s, s );
             morph.name="tree"
-            morph.position.set( x, getH(x,z)-0.5, z );
+            morph.position.set( x, getH(x,-z)-0.5, z );
             morph.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
 
             scene.add( morph );
@@ -1270,7 +1271,7 @@ var grassMesh, grassGeometry, grassMaterial;
 
             var x = naturePos[0][i];
             var z = naturePos[1][i];
-
+/*
             var Shaders = {
                 LitAttributeAnimated: {
                     'vertex': ["varying vec2 glTexCoord;",
@@ -1310,15 +1311,16 @@ var grassMesh, grassGeometry, grassMaterial;
                 fragmentShader: Shaders.LitAttributeAnimated.fragment,
                 fog:true
             });
-            
+            */
+        var faceMaterial = new THREE.MeshBasicMaterial({ map: THREE.ImageUtils.loadTexture( 'branch1.png'), transparent: true});
 
-            var morph2 = new THREE.Mesh( geometry, shaderMaterial );
+            var morph2 = new THREE.Mesh( geometry, faceMaterial );
 
             var s = THREE.Math.randFloat( 0.00075, 0.001 );
             morph2.scale.set( s, s, s );
             morph2.name="tree"
             
-            morph2.position.set( x, getH(x,z)-0.5, z );
+            morph2.position.set( x, getH(x,-z)-0.5, z );
             morph2.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
             scene.add( morph2 );
             morphs.push( morph2 );
@@ -1384,7 +1386,7 @@ function onWindowResize( event ) {
   function animate() {
 
         //requestAnimationFrame( animate );
-
+/*
         if ( t > 30 ) t = 0;
 
         var delta = clock.getDelta();
@@ -1397,7 +1399,7 @@ for ( var i = 0, il = grassGeometry.vertices.length / 2 - 1; i <= il; i ++ ) {
                 grassGeometry.verticesNeedUpdate = true;
         if (don==false && morphs.length>0) dod();
         
-
+*/
         controls.update( Date.now() - time );
         //time = Date.now() - time ;
         render();
@@ -1649,11 +1651,6 @@ function checkPos(camera){
     var ground_geometry = new THREE.PlaneGeometry( 256, 256, worldWidth - 1, worldDepth - 1 );
     for ( var i = 0, l = ground_geometry.vertices.length; i < l; i ++ ) {
         ground_geometry.vertices[ i ].z = data[ i ]/5-10;//NoiseGen.noise( ground_geometry.vertices[ i ].x / 20, ground_geometry.vertices[ i ].y / 20 ) * 10;
-        
-        if (heights[Math.floor(ground_geometry.vertices[ i ].x)] == undefined)
-        heights[""+Math.floor(ground_geometry.vertices[ i ].x)] = {};
-        heights[""+Math.floor(ground_geometry.vertices[ i ].x)][""+Math.floor(ground_geometry.vertices[ i ].y)]=ground_geometry.vertices[ i ].z;
-  
     }
     ground_geometry.computeFaceNormals();
     ground_geometry.computeVertexNormals();
@@ -1665,7 +1662,12 @@ function checkPos(camera){
     ground.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
     ground.receiveShadow = true;
     scene.add( ground );
-
+    for ( var i = 0, l = ground.geometry.vertices.length; i < l; i ++ ) {
+        if (heights[Math.floor(ground.geometry.vertices[ i ].x)] == undefined)
+        heights[""+Math.floor(ground.geometry.vertices[ i ].x)] = {};
+        heights[""+Math.floor(ground.geometry.vertices[ i ].x)][""+Math.floor(ground.geometry.vertices[ i ].y)]=ground.geometry.vertices[ i ].z;
+  
+    }
     grassMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, side: THREE.DoubleSide } );
     grassGeometry = new THREE.Geometry();
     for ( var i = 0, l = grassCount; i < l; i++ ) {
@@ -1675,7 +1677,7 @@ function checkPos(camera){
     scene.add(grassMesh);
 
 ///////    
-//funcdt();
+funcdt();
 
         spawnBox();
         scene.simulate();
