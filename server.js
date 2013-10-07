@@ -296,7 +296,7 @@ createnature();
 fu.get("/", fu.staticHandler("index.html"));
 fu.get("/styles.css", fu.staticHandler("styles.css"));
 fu.get("/client.js", fu.staticHandler("client.js"));
-fu.get("/physijs_worker.js.js", fu.staticHandler("physijs_worker.js.js"));
+fu.get("/physijs_worker.js", fu.staticHandler("physijs_worker.js"));
 fu.get("/physi.js", fu.staticHandler("physi.js"));
 fu.get("/ammo.js", fu.staticHandler("ammo.js"));
 fu.get("/android.js", fu.staticHandler("android.js"));
