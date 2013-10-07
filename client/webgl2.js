@@ -374,16 +374,16 @@ THREE.Euler.prototype = {
 
 };
 
-var yawObject,nh;
+var yawObject,pitchObject,nh;
+var direct;
 
 THREE.PointerLockControls = function ( camera ) {
 //console.log("YES");
 
     var scope = this;
-
     camera.rotation.set( 0, 0, 0 );
 
-    var pitchObject = new THREE.Object3D();
+    pitchObject = new THREE.Object3D();
     pitchObject.add( camera );
 
     yawObject = new THREE.Object3D();
@@ -440,6 +440,20 @@ THREE.PointerLockControls = function ( camera ) {
                 break;
 
             case 32: // space
+
+var vector = new THREE.Vector3( 0, 0, -1 );
+
+direct =vector.applyQuaternion( yawObject.quaternion );
+
+        var direction = new THREE.Vector3( 0, 0, -1 );
+        var rotation = new THREE.Euler( 0, 0, 0, "YXZ" );
+
+        rotation.set( pitchObject.rotation.x, yawObject.rotation.y, 0 );
+
+direct =  direction.applyEuler( rotation );
+
+direct = direct.multiplyScalar( 5 );
+spawnBox()
                 if ( canJump === true ) velocity.y += 10;
                 canJump = false;
                 break;
@@ -1226,16 +1240,16 @@ var grassMesh, grassGeometry, grassMaterial;
                 return mesh;
             }
  function loadtrees(loader,branchfactor,levels,leafsprite,iduni,idxstart,idxend,amplitude,previousRender,attributes,displacement,seed,segments,vMultiplier,twigScale,initalBranchLength,lengthFalloffFactor,lengthFalloffPower,clumpMax,clumpMin){
-
     var url = 'http://localhost:8080/tree?leaves=0&levels='+levels+'&branchfactor='+branchfactor
-    if (seed != undefined)
-    url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale='+twigScale
-    //+'&initalBranchLength='+initalBranchLength+'&lengthFalloffFactor='+lengthFalloffFactor+'&lengthFalloffPower='+lengthFalloffPower+'&clumpMax='+clumpMax+'&clumpMin='+clumpMin
-    var c = loader.load( url, function ( geometry, materials ) {
+    //TRUNK
+    if (seed != undefined) {
+        url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale='+twigScale
+        //+'&initalBranchLength='+initalBranchLength+'&lengthFalloffFactor='+lengthFalloffFactor+'&lengthFalloffPower='+lengthFalloffPower+'&clumpMax='+clumpMax+'&clumpMin='+clumpMin
+    }
+    loader.load( url, function ( geometry, materials ) {
         var material = materials[ 0 ];
         material.color.setHex( 0xffffff );
         material.ambient.setHex( 0xffffff );
-//        var faceMaterial = new THREE.MeshFaceMaterial( materials );
         var faceMaterial = new THREE.MeshBasicMaterial({ map:THREE.ImageUtils.loadTexture( 'texture.jpg')});
 
         for ( var i = idxstart; i < idxend; i ++ ) {
@@ -1255,10 +1269,12 @@ var grassMesh, grassGeometry, grassMaterial;
         }
 
     });
+    // BRANCHES
     url = 'http://localhost:8080/tree?leaves=1&levels='+levels+'&branchfactor='+branchfactor
-    if (seed != undefined)
-    url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale='+twigScale
-    //+'&initalBranchLength='+initalBranchLength+'&lengthFalloffFactor='+lengthFalloffFactor+'&lengthFalloffPower='+lengthFalloffPower+'&clumpMax='+clumpMax+'&clumpMin='+clumpMin
+    if (seed != undefined) {
+        url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale='+twigScale
+        //+'&initalBranchLength='+initalBranchLength+'&lengthFalloffFactor='+lengthFalloffFactor+'&lengthFalloffPower='+lengthFalloffPower+'&clumpMax='+clumpMax+'&clumpMin='+clumpMin
+    }
     loader.load( url, function ( geometry, materials ) {
         var material = materials[ 0 ];
         material.color.setHex( 0xffffff );
@@ -1312,10 +1328,8 @@ var grassMesh, grassGeometry, grassMaterial;
                 fog:true
             });
             */
-        var faceMaterial = new THREE.MeshBasicMaterial({ map: THREE.ImageUtils.loadTexture( 'branch1.png'), transparent: true});
-
+            var faceMaterial = new THREE.MeshBasicMaterial({ map: THREE.ImageUtils.loadTexture( 'branch1.png'), transparent: true});
             var morph2 = new THREE.Mesh( geometry, faceMaterial );
-
             var s = THREE.Math.randFloat( 0.00075, 0.001 );
             morph2.scale.set( s, s, s );
             morph2.name="tree"
@@ -1331,50 +1345,11 @@ var grassMesh, grassGeometry, grassMaterial;
 }      
 
 
-function funcdt() {     
+function loadNature() {     
     var loader = new THREE.JSONLoader();
     loadtrees(loader,3.4,5,'sprite1',1,0,199,"amplitude","previousRender",attributesS6,"displacement"   );
-        loadtrees(loader,3.4,5,'sprite1',1,200,399,"amplitude","previousRender",attributesS6,"displacement",10,10,3,1);
+    loadtrees(loader,3.4,5,'sprite1',1,200,399,"amplitude","previousRender",attributesS6,"displacement",10,10,3,1);
     loadtrees(loader,6,20,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2");
-}
-
-
-
-
-function generateTexture( data, width, height ) {
-
-    var canvas, canvasScaled, context, image, imageData,
-    level, diff, vector3, sun, shade;
-
-    vector3 = new THREE.Vector3( 0, 0, 0 );
-
-    sun = new THREE.Vector3( 1, 1, 1 );
-    sun.normalize();
-
-    canvas = document.createElement( 'canvas' );
-    canvas.width = width;
-    canvas.height = height;
-
-    context = canvas.getContext( '2d' );
-    context.fillStyle = '#000';
-    context.fillRect( 0, 0, width, height );
-
-    image = context.getImageData( 0, 0, canvas.width, canvas.height );
-    imageData = image.data;
-
-    for ( var i = 0, j = 0, l = imageData.length; i < l; i += 4, j ++ ) {
-
-        vector3.x = data[ j - 2 ] - data[ j + 2 ];
-        vector3.y = 2;
-        vector3.z = data[ j - width * 2 ] - data[ j + width * 2 ];
-        vector3.normalize();
-
-        shade = vector3.dot( sun );
-
-        imageData[ i ] = ( 96 + shade * 128 ) * ( 0.5 + data[ j ] * 0.007 );
-        imageData[ i + 1 ] = ( 32 + shade * 96 ) * ( 0.5 + data[ j ] * 0.007 );
-        imageData[ i + 2 ] = ( shade * 96 ) * ( 0.5 + data[ j ] * 0.007 );
-    }
 }
 
 function onWindowResize( event ) {
@@ -1383,43 +1358,43 @@ function onWindowResize( event ) {
     camera.updateProjectionMatrix();
 }
 
-  function animate() {
+function animate() {
 
-        //requestAnimationFrame( animate );
+    //requestAnimationFrame( animate );
 /*
-        if ( t > 30 ) t = 0;
+    if ( t > 30 ) t = 0;
 
-        var delta = clock.getDelta();
+    var delta = clock.getDelta();
 for ( var i = 0, il = grassGeometry.vertices.length / 2 - 1; i <= il; i ++ ) {
-                    for ( var j = 0, jl = 2, f = (il - i) / il; j < jl; j++ ) {
-                        //grassGeometry.vertices[ jl * i + j ].z = f * Math.sin(time) / 200
-                    }
+                for ( var j = 0, jl = 2, f = (il - i) / il; j < jl; j++ ) {
+                    //grassGeometry.vertices[ jl * i + j ].z = f * Math.sin(time) / 200
                 }
+            }
 
-                grassGeometry.verticesNeedUpdate = true;
-        if (don==false && morphs.length>0) dod();
-        
+            grassGeometry.verticesNeedUpdate = true;
+    if (don==false && morphs.length>0) dod();
+    
 */
-        controls.update( Date.now() - time );
-        //time = Date.now() - time ;
-        render();
-        
+    controls.update( Date.now() - time );
+    //time = Date.now() - time ;
+    render();
+    
+}
+function dod(){
+
+
+        don=true;
+}
+
+
+
+
+function replacer(key, value) {
+    if (typeof value === 'number' && !isFinite(value)) {
+        return String(value);
     }
-    function dod(){
-
-
-            don=true;
-    }
-
-
-
-
-    function replacer(key, value) {
-        if (typeof value === 'number' && !isFinite(value)) {
-            return String(value);
-        }
-        return value;
-    }
+    return value;
+}
 
 function checkPos(camera){
     var willsend=false;
@@ -1439,112 +1414,98 @@ function checkPos(camera){
         send(JSON.stringify(myPos,replacer));
 }
 
-
-/*function render() {
-    var xc,yc,zc=0;
-    for (var prop in myJSONUserPosArray2) {
-            var tt = JSON.parse(myJSONUserPosArray2[prop])
-        if ((    lastpos!=myJSONUserPosArray2[prop]) && (prop !=CONFIG.nick)) {
-            for (var prop2 in tt) {
-            if (prop2='x')
-                xc=tt[prop2];
-            if (prop2='y')
-                yc=tt[prop2];
-            if (prop2='z')
-                zc=tt[prop2];
+var box;
+spawnBox = (function() {
+    var box_geometry = new THREE.SphereGeometry( 0.2, 16, 16 ),
+        handleCollision = function( collided_with, linearVelocity, angularVelocity ) {
+            switch ( ++this.collisions ) {
+                
+                case 1:
+                    this.material.color.setHex(0xcc8855);
+                    break;
+                
+                case 2:
+                    this.material.color.setHex(0xbb9955);
+                    break;
+                
+                case 3:
+                    this.material.color.setHex(0xaaaa55);
+                    break;
+                
+                case 4:
+                    this.material.color.setHex(0x99bb55);
+                    break;
+                
+                case 5:
+                    this.material.color.setHex(0x88cc55);
+                    break;
+                
+                case 6:
+                    this.material.color.setHex(0x77dd55);
+                    break;
             }
-            android.position.x=xc;
-            android.position.y=yc;
-            android.position.z=zc;
-        }
-        lastpos=myJSONUserPosArray2[prop]
-
-    }
-    camera.uniforms[1].amplitude.value = 3*Math.sin(frame)+Math.cos(frame);
-    camera.uniforms[2].amplitude2.value = 3*Math.sin(frame)+Math.cos(frame);
-    camera.uniforms[3].amplitude3.value = 3*Math.sin(frame)+Math.cos(frame);
-    camera.uniforms[4].amplitude4.value = 3*Math.sin(frame)+Math.cos(frame);
-    camera.uniforms[5].amplitude5.value = 3*Math.sin(frame)+Math.cos(frame);
-    camera.uniforms[6].amplitude6.value = 3*Math.sin(frame)+Math.cos(frame);
-    frame += 0.04;
-
- //               renderer.clear();
-//                composer.render();//
-//scene.simulate();
-
-
-*/
-////
-    initScene = function() {
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize( window.innerWidth, window.innerHeight );
-        renderer.shadowMapEnabled = true;
-        renderer.shadowMapSoft = true;
-       
-        renderer.setClearColor(new THREE.Color(0xB4E4F4));
-
-        var container = document.createElement( 'div' );
-        document.body.appendChild( container );
-        container.appendChild( renderer.domElement );
-
-
-        scene = new Physijs.Scene;
-        scene.setGravity(new THREE.Vector3( 0, -30, 0 ));
-        scene.addEventListener(
-            'update',
-            function() {
-                scene.simulate( undefined, 1 );
+        },
+        createBox = function() {
+            var material;
+            
+            material = Physijs.createMaterial(
+                new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'texture.jpg' ) }),
+                .6, // medium friction
+                .3 // low restitution
+            );
+            material.map.wrapS = material.map.wrapT = THREE.RepeatWrapping;
+            material.map.repeat.set( .5, .5 );
+            
+            //material = new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'images/rocks.jpg' ) });
+            
+            box = new Physijs.BoxMesh(
+                box_geometry,
+                material
+            );
+            box.collisions = 0;
+            
+            box.position.set(
+                yawObject.position.x,
+                yawObject.position.y+0.3,
+                yawObject.position.z
+            );
+            
+            box.rotation.set(
+                Math.random() * Math.PI,
+                Math.random() * Math.PI,
+                Math.random() * Math.PI
+            );
+            
+            box.castShadow = true;
+            box.addEventListener( 'collision', handleCollision );
+//                box.addEventListener( 'ready', spawnBox );
+            scene.add( box );
+            if (direct != null){
+                box.applyCentralImpulse(direct);
             }
-        );
-        
-        camera = new THREE.PerspectiveCamera(
-            35,
-            window.innerWidth / window.innerHeight,
-            1,
-            1000
-        );
-        camera.position.set( 60, 50, 60 );
-        camera.lookAt( scene.position );
-        scene.add( camera );
-        
-        // Light
-        light = new THREE.DirectionalLight( 0xFFFFFF );
-        light.position.set( 20, 40, -15 );
-        light.target.position.copy( scene.position );
-        light.castShadow = true;
-        light.shadowCameraLeft = -60;
-        light.shadowCameraTop = -60;
-        light.shadowCameraRight = 60;
-        light.shadowCameraBottom = 60;
-        light.shadowCameraNear = 20;
-        light.shadowCameraFar = 200;
-        light.shadowBias = -.0001
-        light.shadowMapWidth = light.shadowMapHeight = 2048;
-        light.shadowDarkness = .7;
-        scene.add( light );
-        
-        // Ground
-        ground_material = Physijs.createMaterial(
-            new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'js/Physijs/examples/images/rocks.jpg' ) }),
-            .8, // high friction
-            .3 // low restitution
-        );
-        ground_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
-        ground_material.map.repeat.set( 3, 3 );
-        
-//////
+            
 
-    sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
-    sprite2 = THREE.ImageUtils.loadTexture( "branch2.png", null );
-//    sprite3 = THREE.ImageUtils.loadTexture( "branch3.png", null );
-//    sprite4 = THREE.ImageUtils.loadTexture( "branch4.png", null );
-//    sprite5 = THREE.ImageUtils.loadTexture( "branch5.png", null );
-//    sprite6 = THREE.ImageUtils.loadTexture( "branch6.png", null );
-//     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
+        };
+    
+    return function() {
+        setTimeout( createBox, 1000 );
+    };
+})();
 
-    camera.position.set( myPos.x,myPos.y,myPos.z);
-    scene.fog = new THREE.FogExp2( 0xB4E4F4, 0.0025 );
-        
+var time;    
+
+render = function() {
+    requestAnimationFrame( render );
+
+
+    controls.update( Date.now() - time );
+
+    renderer.render( scene, camera );
+
+    time = Date.now();
+};
+
+function setUniforms() {
     camera.uniforms=new Array();
     camera.uniforms[1]=  {
               sprite1: { type: "t", value: sprite1 },
@@ -1637,15 +1598,83 @@ function checkPos(camera){
     fogColor:    { type: "c", value: scene.fog.color },
     fogNear:     { type: "f", value: scene.fog.near },
     fogFar:      { type: "f", value: scene.fog.far },fogDensity:      { type: "f", value: 100 }
-            };
-   
+    };
+}
 
+
+initScene = function() {
+    // RENDERER
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.shadowMapEnabled = true;
+    renderer.shadowMapSoft = true;       
+    renderer.setClearColor(new THREE.Color(0xB4E4F4));
+    var container = document.createElement( 'div' );
+    document.body.appendChild( container );
+    container.appendChild( renderer.domElement );
+
+    // SCENE
+    scene = new Physijs.Scene;
+    scene.setGravity(new THREE.Vector3( 0, -30, 0 ));
+    scene.addEventListener(
+        'update',
+        function() {
+            scene.simulate( undefined, 1 );
+        }
+    );
+    
+    // CAMERA
+    camera = new THREE.PerspectiveCamera(
+        35,
+        window.innerWidth / window.innerHeight,
+        1,
+        1000
+    );
+    camera.position.set( 60, 50, 60 );
+    camera.lookAt( scene.position );
+    scene.add( camera );
+    
+    // LIGHT
+    light = new THREE.DirectionalLight( 0xFFFFFF );
+    light.position.set( 20, 40, -15 );
+    light.target.position.copy( scene.position );
+    light.castShadow = true;
+    light.shadowCameraLeft = -60;
+    light.shadowCameraTop = -60;
+    light.shadowCameraRight = 60;
+    light.shadowCameraBottom = 60;
+    light.shadowCameraNear = 20;
+    light.shadowCameraFar = 200;
+    light.shadowBias = -.0001
+    light.shadowMapWidth = light.shadowMapHeight = 2048;
+    light.shadowDarkness = .7;
+    scene.add( light );
+    
+    // MISC
+    sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
+    sprite2 = THREE.ImageUtils.loadTexture( "branch2.png", null );
+
+    camera.position.set( myPos.x,myPos.y,myPos.z);
+    
+    scene.fog = new THREE.FogExp2( 0xB4E4F4, 0.0025 );
+    setUniforms();
+
+    //CONTROLS
     controls = new THREE.PointerLockControls( camera );
     scene.add( controls.getObject() );
 
     var waterWidth = 1024, waterDepth = 1024;
     var worldWidth = 256, worldDepth = 256,
     data = groundGeometry;
+
+    // GROUND
+    ground_material = Physijs.createMaterial(
+        new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'texture.jpg' ) }),
+        .8, // high friction
+        .3 // low restitution
+    );
+    ground_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
+    ground_material.map.repeat.set( 3, 3 );
 
     var NoiseGen = new SimplexNoise;
     var ground_geometry = new THREE.PlaneGeometry( 256, 256, worldWidth - 1, worldDepth - 1 );
@@ -1668,6 +1697,8 @@ function checkPos(camera){
         heights[""+Math.floor(ground.geometry.vertices[ i ].x)][""+Math.floor(ground.geometry.vertices[ i ].y)]=ground.geometry.vertices[ i ].z;
   
     }
+
+    //GRASS
     grassMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, side: THREE.DoubleSide } );
     grassGeometry = new THREE.Geometry();
     for ( var i = 0, l = grassCount; i < l; i++ ) {
@@ -1676,96 +1707,13 @@ function checkPos(camera){
     grassMesh = new THREE.Mesh( grassGeometry, grassMaterial );
     scene.add(grassMesh);
 
-///////    
-funcdt();
+    //NATURE
+    loadNature();
 
-        spawnBox();
-        scene.simulate();
-        animate();
-    };
-    
-    spawnBox = (function() {
-        var box_geometry = new THREE.CubeGeometry( 1, 1, 1 ),
-            handleCollision = function( collided_with, linearVelocity, angularVelocity ) {
-                switch ( ++this.collisions ) {
-                    
-                    case 1:
-                        this.material.color.setHex(0xcc8855);
-                        break;
-                    
-                    case 2:
-                        this.material.color.setHex(0xbb9955);
-                        break;
-                    
-                    case 3:
-                        this.material.color.setHex(0xaaaa55);
-                        break;
-                    
-                    case 4:
-                        this.material.color.setHex(0x99bb55);
-                        break;
-                    
-                    case 5:
-                        this.material.color.setHex(0x88cc55);
-                        break;
-                    
-                    case 6:
-                        this.material.color.setHex(0x77dd55);
-                        break;
-                }
-            },
-            createBox = function() {
-                var box, material;
-                
-                material = Physijs.createMaterial(
-                    new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'js/Physijs/examples/images/plywood.jpg' ) }),
-                    .6, // medium friction
-                    .3 // low restitution
-                );
-                material.map.wrapS = material.map.wrapT = THREE.RepeatWrapping;
-                material.map.repeat.set( .5, .5 );
-                
-                //material = new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'images/rocks.jpg' ) });
-                
-                box = new Physijs.BoxMesh(
-                    box_geometry,
-                    material
-                );
-                box.collisions = 0;
-                
-                box.position.set(
-                    Math.random() * 15 - 7.5,
-                    25,
-                    Math.random() * 15 - 7.5
-                );
-                
-                box.rotation.set(
-                    Math.random() * Math.PI,
-                    Math.random() * Math.PI,
-                    Math.random() * Math.PI
-                );
-                
-                box.castShadow = true;
-                box.addEventListener( 'collision', handleCollision );
-                box.addEventListener( 'ready', spawnBox );
-                scene.add( box );
-            };
-        
-        return function() {
-            setTimeout( createBox, 1000 );
-        };
-    })();
-var time;    
-    render = function() {
-        requestAnimationFrame( render );
-
-
-        controls.update( Date.now() - time );
-
-        renderer.render( scene, camera );
-
-        time = Date.now();
+    spawnBox(null);
+    scene.simulate();
+    animate();
     };
 
-    initScene();
+initScene();
 //composer.render(0.05);
