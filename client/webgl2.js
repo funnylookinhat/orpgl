@@ -5,8 +5,8 @@
     Physijs.scripts.worker = 'physijs_worker.js';
     Physijs.scripts.ammo = 'ammo.js';
     
-    var initScene, render, _boxes = [], spawnBox,
-        renderer, render_stats, physics_stats, scene, ground_material, ground, light, camera;
+    var clock, initScene, render, _boxes = [], spawnBox,
+        renderer, render_stats, physics_stats, scene, ground_material, ground, light, camera,customUniforms2;
 ////    
 var composer, dpr, effectFXAA, renderScene;
 var t = 0;
@@ -1221,25 +1221,28 @@ var grassMesh, grassGeometry, grassMaterial;
                 geometry.faces[3].vertexColors[2] = geometry.faces[2].vertexColors[2];
                 
                 var mesh = new THREE.Mesh( geometry, material );
-                mesh.scale.set(0.3, Math.random() * 0.3 + 0.3, 0.3);
+                mesh.scale.set(0.2, Math.random() * 0.2 + 0.2, 0.2);
                 mesh.position.x = Math.round(Math.random() * 240-120);
                 mesh.position.z = Math.round(Math.random() * 240-120);
                 var i=0;
                 var h = 0;
                 h = getH(mesh.position.x ,-mesh.position.z)-0.5;
-                if (h<10&&h>-3) {
+                if (h<3&&h>0) {
                 
-                   mesh.scale.set(0.1, Math.random() * 0.1 + 0.1, 0.1);                
+                   mesh.scale.set(0.1, Math.random() * 0.2 + 0.1, 0.1);                
                 }
-                else if (h<-5) {
-
+                else if (h>3) {
                 }
-                else {h=-1000}
+                else {
+                    mesh =null;
+                    return null
+                }
                 mesh.position.y = h;
                 mesh.rotation.y = Math.random();
                 return mesh;
             }
  function loadtrees(loader,branchfactor,levels,leafsprite,iduni,idxstart,idxend,amplitude,previousRender,attributes,displacement,seed,segments,vMultiplier,twigScale,initalBranchLength,lengthFalloffFactor,lengthFalloffPower,clumpMax,clumpMin){
+    
     var url = 'http://localhost:8080/tree?leaves=0&levels='+levels+'&branchfactor='+branchfactor
     //TRUNK
     if (seed != undefined) {
@@ -1255,7 +1258,7 @@ var grassMesh, grassGeometry, grassMaterial;
         for ( var i = idxstart; i < idxend; i ++ ) {
             var x = naturePos[0][i];
             var z = naturePos[1][i];
-
+if (getH(x,-z) < 0 ) continue;
             var morph = new THREE.Mesh( geometry, faceMaterial );
             var s = THREE.Math.randFloat( 0.00075, 0.001 );
             morph.scale.set( s, s, s );
@@ -1287,6 +1290,7 @@ var grassMesh, grassGeometry, grassMaterial;
 
             var x = naturePos[0][i];
             var z = naturePos[1][i];
+if (getH(x,-z) < 0 ) continue;
 /*
             var Shaders = {
                 LitAttributeAnimated: {
@@ -1498,6 +1502,9 @@ render = function() {
     requestAnimationFrame( render );
 
 
+    var delta = clock.getDelta();
+    customUniforms2.time.value += delta;
+
     controls.update( Date.now() - time );
 
     renderer.render( scene, camera );
@@ -1603,6 +1610,7 @@ function setUniforms() {
 
 
 initScene = function() {
+    clock = new THREE.Clock();
     // RENDERER
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize( window.innerWidth, window.innerHeight );
@@ -1734,6 +1742,7 @@ var vertexShader = document.getElementById( 'skyVertexShader' ).textContent;
 ground_material.color.setHSL( 0.095, 1, 0.75 );
 
     var NoiseGen = new SimplexNoise;
+
     var ground_geometry = new THREE.PlaneGeometry( 256, 256, worldWidth - 1, worldDepth - 1 );
     for ( var i = 0, l = ground_geometry.vertices.length; i < l; i ++ ) {
         ground_geometry.vertices[ i ].z = data[ i ]/5-10;//NoiseGen.noise( ground_geometry.vertices[ i ].x / 20, ground_geometry.vertices[ i ].y / 20 ) * 10;
@@ -1761,13 +1770,53 @@ ground_material.color.setHSL( 0.095, 1, 0.75 );
     grassMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, side: THREE.DoubleSide } );
     grassGeometry = new THREE.Geometry();
     for ( var i = 0, l = grassCount; i < l; i++ ) {
-        THREE.GeometryUtils.merge(grassGeometry, generateRandomGrassLeaf( grassMaterial ) );
+        var leaf = generateRandomGrassLeaf( grassMaterial );
+        if (leaf)
+        THREE.GeometryUtils.merge(grassGeometry, leaf);
     }
     grassMesh = new THREE.Mesh( grassGeometry, grassMaterial );
     scene.add(grassMesh);
 
     //NATURE
     loadNature();
+
+
+    var noiseTexture = new THREE.ImageUtils.loadTexture( 'cloud.png' );
+    noiseTexture.wrapS = noiseTexture.wrapT = THREE.RepeatWrapping; 
+        
+
+    var waterTexture = new THREE.ImageUtils.loadTexture( 'water.png' );
+    waterTexture.wrapS = waterTexture.wrapT = THREE.RepeatWrapping; 
+    
+    // use "this." to create global object
+    customUniforms2 = {
+        baseTexture:    { type: "t", value: waterTexture },
+        baseSpeed:      { type: "f", value: 0.005 },
+        noiseTexture:   { type: "t", value: noiseTexture },
+        noiseScale:     { type: "f", value: 0.2 },
+        alpha:          { type: "f", value: 0.8 },
+        time:           { type: "f", value: 1.0 }
+    };
+
+    // create custom material from the shader code above
+    //   that is within specially labeled script tags
+    var customMaterial2 = new THREE.ShaderMaterial( 
+    {
+        uniforms: customUniforms2,
+        vertexShader:   document.getElementById( 'waterVertexShader'   ).textContent,
+        fragmentShader: document.getElementById( 'waterFragmentShader' ).textContent
+    }   );
+ 
+    // other material properties
+    customMaterial2.side = THREE.DoubleSide;
+    customMaterial2.transparent = true;
+    
+    // apply the material to a surface
+    var flatGeometry = new THREE.PlaneGeometry( 1024, 1024 );
+    var water_surface = new THREE.Mesh( flatGeometry, customMaterial2 );
+
+    scene.add(water_surface);
+    water_surface.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
 
     renderer.setClearColor( scene.fog.color, 1 );
 
