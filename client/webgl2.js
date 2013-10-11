@@ -1348,8 +1348,8 @@ var grassMesh, grassGeometry, grassMaterial;
 function loadNature() {     
     var loader = new THREE.JSONLoader();
     loadtrees(loader,3.4,5,'sprite1',1,0,199,"amplitude","previousRender",attributesS6,"displacement"   );
-    loadtrees(loader,3.4,5,'sprite1',1,200,399,"amplitude","previousRender",attributesS6,"displacement",10,10,3,1);
-    loadtrees(loader,6,20,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2");
+    //loadtrees(loader,3.4,5,'sprite1',1,200,399,"amplitude","previousRender",attributesS6,"displacement",10,10,3,1);
+    //loadtrees(loader,6,20,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2");
 }
 
 function onWindowResize( event ) {
@@ -1375,7 +1375,7 @@ for ( var i = 0, il = grassGeometry.vertices.length / 2 - 1; i <= il; i ++ ) {
     if (don==false && morphs.length>0) dod();
     
 */
-    controls.update( Date.now() - time );
+//    controls.update( Date.now() - time );
     //time = Date.now() - time ;
     render();
     
@@ -1416,7 +1416,7 @@ function checkPos(camera){
 
 var box;
 spawnBox = (function() {
-    var box_geometry = new THREE.SphereGeometry( 0.2, 16, 16 ),
+    var box_geometry = new THREE.SphereGeometry( 0.24, 8, 8 ),
         handleCollision = function( collided_with, linearVelocity, angularVelocity ) {
             switch ( ++this.collisions ) {
                 
@@ -1606,9 +1606,10 @@ initScene = function() {
     // RENDERER
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize( window.innerWidth, window.innerHeight );
-    renderer.shadowMapEnabled = true;
+    /*renderer.shadowMapEnabled = true;
     renderer.shadowMapSoft = true;       
-    renderer.setClearColor(new THREE.Color(0xB4E4F4));
+    */
+    //renderer.setClearColor(new THREE.Color(0xB4E4F4));
     var container = document.createElement( 'div' );
     document.body.appendChild( container );
     container.appendChild( renderer.domElement );
@@ -1635,8 +1636,9 @@ initScene = function() {
     scene.add( camera );
     
     // LIGHT
-    light = new THREE.DirectionalLight( 0xFFFFFF );
-    light.position.set( 20, 40, -15 );
+    //light = new THREE.HemisphereLight( 0x404040, 0x909090, 3 ); 
+    //new THREE.AmbientLight( 0x404040 );//THREE.DirectionalLight( 0xFFFFFF );
+    /*light.position.set( 20, 40, -15 );
     light.target.position.copy( scene.position );
     light.castShadow = true;
     light.shadowCameraLeft = -60;
@@ -1648,16 +1650,70 @@ initScene = function() {
     light.shadowBias = -.0001
     light.shadowMapWidth = light.shadowMapHeight = 2048;
     light.shadowDarkness = .7;
-    scene.add( light );
-    
+    */
+    //scene.add( light );
+        //scene.fog = new THREE.FogExp2( 0xB4E4F4, 0.0025 );
+scene.fog = new THREE.Fog( 0xffffff, 1, 300 );
+                scene.fog.color.setHSL( 0.6, 0, 1 );
+                // LIGHTS
+
+                var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.6 );
+                hemiLight.color.setHSL( 0.6, 1, 0.6 );
+                hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
+                hemiLight.position.set( 0, 500, 0 );
+                scene.add( hemiLight );
+
+                //
+
+                var dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
+                dirLight.color.setHSL( 0.1, 1, 0.95 );
+                dirLight.position.set( -1, 1.75, 1 );
+                dirLight.position.multiplyScalar( 50 );
+                scene.add( dirLight );
+
+                dirLight.castShadow = true;
+
+                dirLight.shadowMapWidth = 2048;
+                dirLight.shadowMapHeight = 2048;
+
+                var d = 50;
+
+                dirLight.shadowCameraLeft = -d;
+                dirLight.shadowCameraRight = d;
+                dirLight.shadowCameraTop = d;
+                dirLight.shadowCameraBottom = -d;
+
+                dirLight.shadowCameraFar = 3500;
+                dirLight.shadowBias = -0.0001;
+                dirLight.shadowDarkness = 0.35;
+                //dirLight.shadowCameraVisible = true;
+
+var vertexShader = document.getElementById( 'skyVertexShader' ).textContent;
+                var fragmentShader = document.getElementById( 'skyFragmentShader' ).textContent;
+                var uniforms = {
+                    topColor:    { type: "c", value: new THREE.Color( 0x0077ff ) },
+                    bottomColor: { type: "c", value: new THREE.Color( 0xffffff ) },
+                    offset:      { type: "f", value: 33 },
+                    exponent:    { type: "f", value: 0.6 }
+                }
+                uniforms.topColor.value.copy( hemiLight.color );
+
+                scene.fog.color.copy( uniforms.bottomColor.value );
+
+                var skyGeo = new THREE.SphereGeometry( 400, 32, 15 );
+                var skyMat = new THREE.ShaderMaterial( { vertexShader: vertexShader, fragmentShader: fragmentShader, uniforms: uniforms, side: THREE.BackSide } );
+
+                var sky = new THREE.Mesh( skyGeo, skyMat );
+                scene.add( sky );
+
+
     // MISC
     sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
     sprite2 = THREE.ImageUtils.loadTexture( "branch2.png", null );
 
     camera.position.set( myPos.x,myPos.y,myPos.z);
     
-    scene.fog = new THREE.FogExp2( 0xB4E4F4, 0.0025 );
-    setUniforms();
+    //setUniforms();
 
     //CONTROLS
     controls = new THREE.PointerLockControls( camera );
@@ -1675,6 +1731,7 @@ initScene = function() {
     );
     ground_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
     ground_material.map.repeat.set( 3, 3 );
+ground_material.color.setHSL( 0.095, 1, 0.75 );
 
     var NoiseGen = new SimplexNoise;
     var ground_geometry = new THREE.PlaneGeometry( 256, 256, worldWidth - 1, worldDepth - 1 );
@@ -1691,6 +1748,8 @@ initScene = function() {
     ground.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
     ground.receiveShadow = true;
     scene.add( ground );
+    ground.receiveShadow = true;
+
     for ( var i = 0, l = ground.geometry.vertices.length; i < l; i ++ ) {
         if (heights[Math.floor(ground.geometry.vertices[ i ].x)] == undefined)
         heights[""+Math.floor(ground.geometry.vertices[ i ].x)] = {};
@@ -1710,6 +1769,14 @@ initScene = function() {
     //NATURE
     loadNature();
 
+    renderer.setClearColor( scene.fog.color, 1 );
+
+    renderer.gammaInput = true;
+    renderer.gammaOutput = true;
+    renderer.physicallyBasedShading = true;
+
+    renderer.shadowMapEnabled = true;
+    renderer.shadowMapCullFace = THREE.CullFaceBack;
     spawnBox(null);
     scene.simulate();
     animate();
