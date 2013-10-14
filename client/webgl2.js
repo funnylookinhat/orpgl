@@ -1475,10 +1475,26 @@ for (var i=0; i<final_objs.length; i++) {
     final_objs[i].visible = frustum.intersectsObject( final_objs[i] );
 }
 
+
+skyUniforms.bottomColor.value.r = clock.elapsedTime /100 % 1;
+skyUniforms.bottomColor.value.g = clock.elapsedTime /100 % 1;
+skyUniforms.bottomColor.value.b = clock.elapsedTime /100 % 1;
+
     renderer.render( scene, camera );
 
     time = Date.now();
 };
+
+   function colorToHex(color) {
+    var digits = /(.*?)rgb\((\d+), (\d+), (\d+)\)/.exec(color);
+    
+    var red = parseInt(digits[2]);
+    var green = parseInt(digits[3]);
+    var blue = parseInt(digits[4]);
+    
+    var rgb = blue | (green << 8) | (red << 16);
+    return digits[1] + 'Ox' + rgb.toString(16);
+}
 
 function setUniforms() {
     camera.uniforms=new Array();
@@ -1578,7 +1594,7 @@ function setUniforms() {
 
 var _leaves  = new Array();
 var _trees  = new Array();
-
+var skyUniforms;
 initScene = function() {
     clock = new THREE.Clock();
     // RENDERER
@@ -1669,18 +1685,18 @@ scene.fog = new THREE.Fog( 0xffffff, 1, 300 );
 
 var vertexShader = document.getElementById( 'skyVertexShader' ).textContent;
                 var fragmentShader = document.getElementById( 'skyFragmentShader' ).textContent;
-                var uniforms = {
+                skyUniforms = {
                     topColor:    { type: "c", value: new THREE.Color( 0x0077ff ) },
                     bottomColor: { type: "c", value: new THREE.Color( 0xffffff ) },
                     offset:      { type: "f", value: 33 },
                     exponent:    { type: "f", value: 0.6 }
                 }
-                uniforms.topColor.value.copy( hemiLight.color );
+                skyUniforms.topColor.value.copy( hemiLight.color );
 
-                scene.fog.color.copy( uniforms.bottomColor.value );
+                scene.fog.color.copy( skyUniforms.bottomColor.value );
 
                 var skyGeo = new THREE.SphereGeometry( 400, 32, 15 );
-                var skyMat = new THREE.ShaderMaterial( { vertexShader: vertexShader, fragmentShader: fragmentShader, uniforms: uniforms, side: THREE.BackSide } );
+                var skyMat = new THREE.ShaderMaterial( { vertexShader: vertexShader, fragmentShader: fragmentShader, uniforms: skyUniforms, side: THREE.BackSide } );
 
                 var sky = new THREE.Mesh( skyGeo, skyMat );
                 scene.add( sky );
