@@ -1325,13 +1325,6 @@ function onWindowResize( event ) {
 }
 
 function animate() {
-    frustum.setFromMatrix( new THREE.Matrix4().multiply( camera.projectionMatrix, camera.matrixWorldInverse ) );
-var objs = new Array();
-var final_objs = objs.concat(_leaves,_trees);
-
-for (var i=0; i<final_objs.length; i++) {
-    final_objs[i].visible = frustum.intersectsObject( final_objs[i] );
-}
     //requestAnimationFrame( animate );
 /*
     if ( t > 30 ) t = 0;
@@ -1438,7 +1431,7 @@ spawnBox = (function() {
             
             box.position.set(
                 yawObject.position.x,
-                yawObject.position.y+0.3,
+                yawObject.position.y+1,
                 yawObject.position.z
             );
             
@@ -1474,6 +1467,13 @@ render = function() {
     customUniforms2.time.value += delta;
 
     controls.update( Date.now() - time );
+    frustum.setFromMatrix( new THREE.Matrix4().multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse ) );
+var objs = new Array();
+var final_objs = objs.concat(_leaves,_trees);
+var count=0;
+for (var i=0; i<final_objs.length; i++) {
+    final_objs[i].visible = frustum.intersectsObject( final_objs[i] );
+}
 
     renderer.render( scene, camera );
 
