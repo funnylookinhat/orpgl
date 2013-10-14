@@ -5,7 +5,7 @@
     Physijs.scripts.worker = 'physijs_worker.js';
     Physijs.scripts.ammo = 'ammo.js';
     
-    var clock, initScene, render, _boxes = [], spawnBox,
+    var frustum, clock, initScene, render, _boxes = [], spawnBox,
         renderer, render_stats, physics_stats, scene, ground_material, ground, light, camera,customUniforms2;
 ////    
 var composer, dpr, effectFXAA, renderScene;
@@ -1139,7 +1139,9 @@ var Boid = function() {
         var myPos = { 'x':0,'y':1,'z':0};
         var sphere = null;
         var android = null;
-    
+     var amplitude= 1;
+     var previousRender;
+     var displacement;
 
         var camera, scene, renderer;
         var geometry, material, mesh;
@@ -1268,6 +1270,7 @@ if (getH(x,-z) < 0 ) continue;
 
             scene.add( morph );
             morphs.push( morph );
+            _trees.push( morph );
 
         }
 
@@ -1291,48 +1294,8 @@ if (getH(x,-z) < 0 ) continue;
             var x = naturePos[0][i];
             var z = naturePos[1][i];
 if (getH(x,-z) < 0 ) continue;
-/*
-            var Shaders = {
-                LitAttributeAnimated: {
-                    'vertex': ["varying vec2 glTexCoord;",
-            "uniform float "+amplitude+";",
-                               "attribute float "+displacement+";", 
-                               "varying vec3 vNormal;",
-                        "void main() {",
-                         "  glTexCoord = uv;",
-                                "vNormal = normal;",
-                                "vec3 newPosition = position + normal * vec3( "+amplitude+" );",
-                          "  gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );",
-                        "}"
 
-
-
-                        ].join("\n"),
-                               
-                    'fragment': [           "varying vec2 glTexCoord;",
-
-                       "uniform sampler2D "+leafsprite+";",
-                       "uniform sampler2D "+previousRender+";",
-
-                       "void main() {",
-
-                       "    vec3 color = texture2D( "+leafsprite+", glTexCoord ).rgb;",
-                    "    gl_FragColor.rgb = color;",   
-                    "if (gl_FragColor.g < 0.1)",
-                    "    discard;",
-                               "}"].join("\n")
-                }
-            };
-
-            var shaderMaterial = new THREE.ShaderMaterial({
-                attributes:     attributes,
-                        uniforms: camera.uniforms[iduni],
-                vertexShader:   Shaders.LitAttributeAnimated.vertex,
-                fragmentShader: Shaders.LitAttributeAnimated.fragment,
-                fog:true
-            });
-            */
-            var faceMaterial = new THREE.MeshBasicMaterial({ map: THREE.ImageUtils.loadTexture( 'branch1.png'), transparent: true});
+            var faceMaterial = new THREE.MeshBasicMaterial({ map: THREE.ImageUtils.loadTexture( 'branch1.png'), transparent: true, depthWrite: false, depthTest: true});
             var morph2 = new THREE.Mesh( geometry, faceMaterial );
             var s = THREE.Math.randFloat( 0.00075, 0.001 );
             morph2.scale.set( s, s, s );
@@ -1342,9 +1305,8 @@ if (getH(x,-z) < 0 ) continue;
             morph2.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
             scene.add( morph2 );
             morphs.push( morph2 );
-
+            _trees.push( morph2 );
         }
-
     } );
 }      
 
@@ -1363,7 +1325,13 @@ function onWindowResize( event ) {
 }
 
 function animate() {
+    frustum.setFromMatrix( new THREE.Matrix4().multiply( camera.projectionMatrix, camera.matrixWorldInverse ) );
+var objs = new Array();
+var final_objs = objs.concat(_leaves,_trees);
 
+for (var i=0; i<final_objs.length; i++) {
+    final_objs[i].visible = frustum.intersectsObject( final_objs[i] );
+}
     //requestAnimationFrame( animate );
 /*
     if ( t > 30 ) t = 0;
@@ -1608,6 +1576,8 @@ function setUniforms() {
     };
 }
 
+var _leaves  = new Array();
+var _trees  = new Array();
 
 initScene = function() {
     clock = new THREE.Clock();
@@ -1637,12 +1607,13 @@ initScene = function() {
         35,
         window.innerWidth / window.innerHeight,
         1,
-        1000
+        800
     );
     camera.position.set( 60, 50, 60 );
     camera.lookAt( scene.position );
     scene.add( camera );
-    
+    frustum = new THREE.Frustum();
+
     // LIGHT
     //light = new THREE.HemisphereLight( 0x404040, 0x909090, 3 ); 
     //new THREE.AmbientLight( 0x404040 );//THREE.DirectionalLight( 0xFFFFFF );
@@ -1721,7 +1692,7 @@ var vertexShader = document.getElementById( 'skyVertexShader' ).textContent;
 
     camera.position.set( myPos.x,myPos.y,myPos.z);
     
-    //setUniforms();
+    setUniforms();
 
     //CONTROLS
     controls = new THREE.PointerLockControls( camera );
@@ -1771,8 +1742,10 @@ ground_material.color.setHSL( 0.095, 1, 0.75 );
     grassGeometry = new THREE.Geometry();
     for ( var i = 0, l = grassCount; i < l; i++ ) {
         var leaf = generateRandomGrassLeaf( grassMaterial );
-        if (leaf)
-        THREE.GeometryUtils.merge(grassGeometry, leaf);
+        if (leaf) {
+            THREE.GeometryUtils.merge(grassGeometry, leaf);
+            _leaves.push(leaf);
+        }
     }
     grassMesh = new THREE.Mesh( grassGeometry, grassMaterial );
     scene.add(grassMesh);
