@@ -558,326 +558,6 @@ spawnBox()
     };
 };
 
- var Bird = function () {
-
-    var scope = this;
-
-    THREE.Geometry.call( this );
-
-    v(   0.5,   0.0,   0.0 );
-    v( - 0.5, - 0.2,   0.1 );
-    v( - 0.5,   0.0,   0.0 );
-    v( - 0.5, - 0.2, - 0.1 );
-
-    v(   0.0,   0.2, - 0.6 );
-    v(   0.0,   0.2,   0.6 );
-    v(   0.2,   0.0,   0.0 );
-    v( - 0.3,   0.0,   0.0 );
-
-    f3( 0, 2, 1 );
-    // f3( 0, 3, 2 );
-
-    f3( 4, 7, 6 );
-    f3( 5, 6, 7 );
-
-    this.computeCentroids();
-    this.computeFaceNormals();
-
-    function v( x, y, z ) {
-
-        scope.vertices.push( new THREE.Vector3( x, y, z ) );
-
-    }
-
-    function f3( a, b, c ) {
-
-        scope.faces.push( new THREE.Face3( a, b, c ) );
-
-    }
-
-}
-
-Bird.prototype = new THREE.Geometry();
-Bird.prototype.constructor = Bird;
-
-var Boid = function() {
-
-                var vector = new THREE.Vector3(),
-                _acceleration, _width = 500, _height = 500, _depth = 200, _goal, _neighborhoodRadius = 100,
-                _maxSpeed = 4, _maxSteerForce = 0.1, _avoidWalls = false;
-
-                this.position = new THREE.Vector3();
-                this.velocity = new THREE.Vector3();
-                _acceleration = new THREE.Vector3();
-
-                this.setGoal = function ( target ) {
-
-                    _goal = target;
-
-                }
-
-                this.setAvoidWalls = function ( value ) {
-
-                    _avoidWalls = value;
-
-                }
-
-                this.setWorldSize = function ( width, height, depth ) {
-
-                    _width = width;
-                    _height = height;
-                    _depth = depth;
-
-                }
-
-                this.run = function ( boids ) {
-
-                    if ( _avoidWalls ) {
-
-                        vector.set( - _width, this.position.y, this.position.z );
-                        vector = this.avoid( vector );
-                        vector.multiplyScalar( 5 );
-                        _acceleration.addSelf( vector );
-
-                        vector.set( _width, this.position.y, this.position.z );
-                        vector = this.avoid( vector );
-                        vector.multiplyScalar( 5 );
-                        _acceleration.addSelf( vector );
-
-                        vector.set( this.position.x, - _height, this.position.z );
-                        vector = this.avoid( vector );
-                        vector.multiplyScalar( 5 );
-                        _acceleration.addSelf( vector );
-
-                        vector.set( this.position.x, _height, this.position.z );
-                        vector = this.avoid( vector );
-                        vector.multiplyScalar( 5 );
-                        _acceleration.addSelf( vector );
-
-                        vector.set( this.position.x, this.position.y, - _depth );
-                        vector = this.avoid( vector );
-                        vector.multiplyScalar( 5 );
-                        _acceleration.addSelf( vector );
-
-                        vector.set( this.position.x, this.position.y, _depth );
-                        vector = this.avoid( vector );
-                        vector.multiplyScalar( 5 );
-                        _acceleration.addSelf( vector );
-
-                    }/* else {
-
-                        this.checkBounds();
-
-                    }
-                    */
-
-                    if ( Math.random() > 0.5 ) {
-
-                        this.flock( boids );
-
-                    }
-
-                    this.move();
-
-                }
-
-                this.flock = function ( boids ) {
-
-                    if ( _goal ) {
-
-                        _acceleration.addSelf( this.reach( _goal, 0.005 ) );
-
-                    }
-
-                    _acceleration.addSelf( this.alignment( boids ) );
-                    _acceleration.addSelf( this.cohesion( boids ) );
-                    _acceleration.addSelf( this.separation( boids ) );
-
-                }
-
-                this.move = function () {
-
-                    this.velocity.addSelf( _acceleration );
-
-                    var l = this.velocity.length();
-
-                    if ( l > _maxSpeed ) {
-
-                        this.velocity.divideScalar( l / _maxSpeed );
-
-                    }
-
-                    this.position.addSelf( this.velocity );
-                    _acceleration.set( 0, 0, 0 );
-
-                }
-
-                this.checkBounds = function () {
-
-                    if ( this.position.x >   _width ) this.position.x = - _width;
-                    if ( this.position.x < - _width ) this.position.x =   _width;
-                    if ( this.position.y >   _height ) this.position.y = - _height;
-                    if ( this.position.y < - _height ) this.position.y =  _height;
-                    if ( this.position.z >  _depth ) this.position.z = - _depth;
-                    if ( this.position.z < - _depth ) this.position.z =  _depth;
-
-                }
-
-                //
-
-                this.avoid = function ( target ) {
-
-                    var steer = new THREE.Vector3();
-
-                    steer.copy( this.position );
-                    steer.subVectors( this.position, target );
-
-                    steer.multiplyScalar( 1 / this.position.distanceToSquared( target ) );
-
-                    return steer;
-
-                }
-
-                this.repulse = function ( target ) {
-
-                    var distance = this.position.distanceTo( target );
-
-                    if ( distance < 150 ) {
-
-                        var steer = new THREE.Vector3();
-
-                        steer.subVectors( this.position, target );
-                        steer.multiplyScalar( 0.5 / distance );
-
-                        _acceleration.addSelf( steer );
-
-                    }
-
-                }
-
-                this.reach = function ( target, amount ) {
-
-                    var steer = new THREE.Vector3();
-
-                    steer.subVectors( target, this.position );
-                    steer.multiplyScalar( amount );
-
-                    return steer;
-
-                }
-
-                this.alignment = function ( boids ) {
-
-                    var boid, velSum = new THREE.Vector3(),
-                    count = 0;
-
-                    for ( var i = 0, il = boids.length; i < il; i++ ) {
-
-                        if ( Math.random() > 0.6 ) continue;
-
-                        boid = boids[ i ];
-
-                        distance = boid.position.distanceTo( this.position );
-
-                        if ( distance > 0 && distance <= _neighborhoodRadius ) {
-
-                            velSum.add( this.position,boid.velocity );
-                            count++;
-
-                        }
-
-                    }
-
-                    if ( count > 0 ) {
-
-                        velSum.divideScalar( count );
-
-                        var l = velSum.length();
-
-                        if ( l > _maxSteerForce ) {
-
-                            velSum.divideScalar( l / _maxSteerForce );
-
-                        }
-
-                    }
-
-                    return velSum;
-
-                }
-
-                this.cohesion = function ( boids ) {
-
-                    var boid, distance,
-                    posSum = new THREE.Vector3(),
-                    steer = new THREE.Vector3(),
-                    count = 0;
-
-                    for ( var i = 0, il = boids.length; i < il; i ++ ) {
-
-                        if ( Math.random() > 0.6 ) continue;
-
-                        boid = boids[ i ];
-                        distance = boid.position.distanceTo( this.position );
-
-                        if ( distance > 0 && distance <= _neighborhoodRadius ) {
-
-                            posSum.addSelf( boid.position );
-                            count++;
-
-                        }
-
-                    }
-
-                    if ( count > 0 ) {
-
-                        posSum.divideScalar( count );
-
-                    }
-
-                    steer.subVectors( posSum, this.position );
-
-                    var l = steer.length();
-
-                    if ( l > _maxSteerForce ) {
-
-                        steer.divideScalar( l / _maxSteerForce );
-
-                    }
-
-                    return steer;
-
-                }
-
-                this.separation = function ( boids ) {
-
-                    var boid, distance,
-                    posSum = new THREE.Vector3(),
-                    repulse = new THREE.Vector3();
-
-                    for ( var i = 0, il = boids.length; i < il; i ++ ) {
-
-                        if ( Math.random() > 0.6 ) continue;
-
-                        boid = boids[ i ];
-                        distance = boid.position.distanceTo( this.position );
-
-                        if ( distance > 0 && distance <= _neighborhoodRadius ) {
-
-                            repulse.subVectors( this.position, boid.position );
-                            repulse.normalize();
-                            repulse.divideScalar( distance );
-                            posSum.addSelf( repulse );
-
-                        }
-
-                    }
-
-                    return posSum;
-
-                }
-
-            }
                    var ImprovedNoise = function () {
 
             var p = [151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,
@@ -1138,8 +818,7 @@ var Boid = function() {
         var sprite6=null;
         var myPos = { 'x':0,'y':1,'z':0};
         var sphere = null;
-        var android = null;
-     var amplitude= 1;
+        var amplitude= 1;
      var previousRender;
      var displacement;
 
@@ -1490,7 +1169,24 @@ else e = v;
 skyUniforms.bottomColor.value.r = e;
 skyUniforms.bottomColor.value.g = e;
 skyUniforms.bottomColor.value.b = e;
+for (var prop in myJSONUserPosArray2) {
+            var tt = JSON.parse(myJSONUserPosArray2[prop])
+        if ((    lastpos!=myJSONUserPosArray2[prop]) && (prop !=CONFIG.nick)) {
+            for (var prop2 in tt) {
+            if (prop2='x')
+                xc=tt[prop2];
+            if (prop2='y')
+                yc=tt[prop2];
+            if (prop2='z')
+                zc=tt[prop2];
+            }
+            android.position.x=xc;
+            android.position.y=yc;
+            android.position.z=zc;
+        }
+        lastpos=myJSONUserPosArray2[prop]
 
+    }
     renderer.render( scene, camera );
 
     time = Date.now();
@@ -1607,6 +1303,7 @@ var _leaves  = new Array();
 var _trees  = new Array();
 var skyUniforms;
 var Sea;
+var android;
 initScene = function() {
     clock = new THREE.Clock();
     // RENDERER
@@ -1717,7 +1414,72 @@ var vertexShader = document.getElementById( 'skyVertexShader' ).textContent;
 /*
 view-source:http://threejs.org/examples/webgl_lensflares.html
 */
+    var Sun_geometry = new THREE.SphereGeometry( 5, 8, 8 );
+    var Sun_material = Physijs.createMaterial(
+        new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'texture.jpg' ) , transparent:true}),
+        .8, // high friction
+        .3 // low restitution
+    );
 
+    Sun_material.opacity = 0.6;
+    var Sun = new THREE.Mesh(Sun_geometry,Sun_material);
+    var textureFlare0 = THREE.ImageUtils.loadTexture( "lensflare0.png" );
+   // var textureFlare2 = THREE.ImageUtils.loadTexture( "lensflare1.png" );
+   // var textureFlare3 = THREE.ImageUtils.loadTexture( "lensflare2.png" );
+    addLight( 0.55, 0.9, 0.5, 390, 10, 0 );
+    Sun.position.set( 395,10,0 );
+    scene.add( Sun );
+
+    function addLight( h, s, l, x, y, z ) {
+
+        var light = new THREE.PointLight( 0xffffff, 1.5, 4500 );
+        light.color.setHSL( h, s, l );
+        light.position.set( x, y, z );
+        scene.add( light );
+
+        var flareColor = new THREE.Color( 0xffffff );
+        flareColor.setHSL( h, s, l + 0.5 );
+
+        var lensFlare = new THREE.LensFlare( textureFlare0, 700, 0.0, THREE.AdditiveBlending, flareColor );
+/*
+        lensFlare.add( textureFlare2, 512, 0.0, THREE.AdditiveBlending );
+        lensFlare.add( textureFlare2, 512, 0.0, THREE.AdditiveBlending );
+        lensFlare.add( textureFlare2, 512, 0.0, THREE.AdditiveBlending );
+
+        lensFlare.add( textureFlare3, 60, 0.6, THREE.AdditiveBlending );
+        lensFlare.add( textureFlare3, 70, 0.7, THREE.AdditiveBlending );
+        lensFlare.add( textureFlare3, 120, 0.9, THREE.AdditiveBlending );
+        lensFlare.add( textureFlare3, 70, 1.0, THREE.AdditiveBlending );
+*/
+        lensFlare.customUpdateCallback = lensFlareUpdateCallback;
+        lensFlare.position = light.position;
+
+        scene.add( lensFlare );
+
+    }
+             function lensFlareUpdateCallback( object ) {
+
+                var f, fl = object.lensFlares.length;
+                var flare;
+                var vecX = -object.positionScreen.x * 2;
+                var vecY = -object.positionScreen.y * 2;
+
+
+                for( f = 0; f < fl; f++ ) {
+
+                       flare = object.lensFlares[ f ];
+
+                       flare.x = object.positionScreen.x + vecX * flare.distance;
+                       flare.y = object.positionScreen.y + vecY * flare.distance;
+
+                       flare.rotation = 0;
+
+                }
+
+               // object.lensFlares[ 2 ].y += 0.025;
+               // object.lensFlares[ 3 ].rotation = object.positionScreen.x * 0.5 + THREE.Math.degToRad( 45 );
+
+            }
     // MISC
     sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
     sprite2 = THREE.ImageUtils.loadTexture( "branch2.png", null );
@@ -1784,6 +1546,23 @@ ground_material.color.setHSL( 0.095, 1, 0.75 );
 
     //NATURE
     loadNature();
+
+    var jsonLoader = new THREE.JSONLoader();
+    jsonLoader.load( "android.js", addModelToScene );
+
+
+    function addModelToScene( geometry, materials )
+    {
+        // for preparing animation
+        for (var i = 0; i < materials.length; i++)
+            materials[i].morphTargets = true;
+
+        var material = new THREE.MeshFaceMaterial( materials );
+        android = new THREE.Mesh( geometry, material );
+        android.scale.set(.1,.1,.1);
+        android.position.y = getH(0 ,0);
+        scene.add( android );
+    }
 
     var noiseTexture = new THREE.ImageUtils.loadTexture( 'cloud.png' );
     noiseTexture.wrapS = noiseTexture.wrapT = THREE.RepeatWrapping; 

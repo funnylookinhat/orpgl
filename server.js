@@ -308,6 +308,9 @@ fu.get("/branch2.png", fu.staticHandler("branch2.png"));
 fu.get("/monster.jpg", fu.staticHandler("monster.jpg"));
 fu.get("/texture.jpg", fu.staticHandler("texture.jpg"));
 fu.get("/cloud.png", fu.staticHandler("cloud.png"));
+fu.get("/lensflare0.png", fu.staticHandler("lensflare0.png"));
+fu.get("/lensflare1.png", fu.staticHandler("lensflare1.png"));
+fu.get("/lensflare2.png", fu.staticHandler("lensflare2.png"));
 fu.get("/water.png", fu.staticHandler("water.png"));
 fu.get("/ShaderWater.js", fu.staticHandler("ShaderWater.js"));
 
