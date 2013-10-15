@@ -992,7 +992,7 @@ if (getH(x,-z) < -5 ) continue;
 
 function loadNature() {     
     var loader = new THREE.JSONLoader();
-    loadtrees(loader,3.4,5,'sprite1',1,0,199,"amplitude","previousRender",attributesS6,"displacement"   );
+    loadtrees(loader,10,5,'sprite1',1,0,199,"amplitude","previousRender",attributesS6,"displacement",10,10,10,1  );
     //loadtrees(loader,3.4,5,'sprite1',1,200,399,"amplitude","previousRender",attributesS6,"displacement",10,10,3,1);
     //loadtrees(loader,6,20,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2");
 }
