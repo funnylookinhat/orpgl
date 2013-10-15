@@ -309,6 +309,7 @@ fu.get("/monster.jpg", fu.staticHandler("monster.jpg"));
 fu.get("/texture.jpg", fu.staticHandler("texture.jpg"));
 fu.get("/cloud.png", fu.staticHandler("cloud.png"));
 fu.get("/water.png", fu.staticHandler("water.png"));
+fu.get("/ShaderWater.js", fu.staticHandler("ShaderWater.js"));
 
 fu.get("/nature.js", fu.staticHandler("nature.js"));
 

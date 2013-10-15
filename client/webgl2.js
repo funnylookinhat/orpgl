@@ -4,7 +4,7 @@
     
     Physijs.scripts.worker = 'physijs_worker.js';
     Physijs.scripts.ammo = 'ammo.js';
-    
+  
     var frustum, clock, initScene, render, _boxes = [], spawnBox,
         renderer, render_stats, physics_stats, scene, ground_material, ground, light, camera,customUniforms2;
 ////    
@@ -548,9 +548,9 @@ spawnBox()
         yawObject.translateZ( velocity.z );
         nh =getH(yawObject.position.x ,-yawObject.position.z)+.5;
         if (yawObject.position.y < nh && (yawObject.position.y - nh) < -.01)
-        yawObject.translateY( .1 )
+        yawObject.translateY( .2 )
         if (yawObject.position.y > nh && (yawObject.position.y - nh) > .01)
-        yawObject.translateY( -.1 ); 
+        yawObject.translateY( -.2 ); 
      //console.log((nh - yawObject.position.y));
 
         checkPos(yawObject);
@@ -1224,12 +1224,12 @@ var grassMesh, grassGeometry, grassMaterial;
                 
                 var mesh = new THREE.Mesh( geometry, material );
                 mesh.scale.set(0.2, Math.random() * 0.2 + 0.2, 0.2);
-                mesh.position.x = Math.round(Math.random() * 240-120);
-                mesh.position.z = Math.round(Math.random() * 240-120);
+                mesh.position.x = Math.random() * 240-120;
+                mesh.position.z = Math.random() * 240-120;
                 var i=0;
                 var h = 0;
                 h = getH(mesh.position.x ,-mesh.position.z)-0.5;
-                if (h<3&&h>0) {
+                if (h<3&&h>-5) {
                 
                    mesh.scale.set(0.1, Math.random() * 0.2 + 0.1, 0.1);                
                 }
@@ -1260,7 +1260,7 @@ var grassMesh, grassGeometry, grassMaterial;
         for ( var i = idxstart; i < idxend; i ++ ) {
             var x = naturePos[0][i];
             var z = naturePos[1][i];
-if (getH(x,-z) < 0 ) continue;
+if (getH(x,-z) < -5 ) continue;
             var morph = new THREE.Mesh( geometry, faceMaterial );
             var s = THREE.Math.randFloat( 0.00075, 0.001 );
             morph.scale.set( s, s, s );
@@ -1293,7 +1293,7 @@ if (getH(x,-z) < 0 ) continue;
 
             var x = naturePos[0][i];
             var z = naturePos[1][i];
-if (getH(x,-z) < 0 ) continue;
+if (getH(x,-z) < -5 ) continue;
 
             var faceMaterial = new THREE.MeshBasicMaterial({ map: THREE.ImageUtils.loadTexture( 'branch1.png'), transparent: true, depthWrite: false, depthTest: true});
             var morph2 = new THREE.Mesh( geometry, faceMaterial );
@@ -1342,8 +1342,8 @@ for ( var i = 0, il = grassGeometry.vertices.length / 2 - 1; i <= il; i ++ ) {
 */
 //    controls.update( Date.now() - time );
     //time = Date.now() - time ;
+    Sea.render();
     render();
-    
 }
 function dod(){
 
@@ -1458,13 +1458,15 @@ spawnBox = (function() {
 })();
 
 var time;    
+var sunround = true;
 
 render = function() {
     requestAnimationFrame( render );
 
 
     var delta = clock.getDelta();
-    customUniforms2.time.value += delta;
+
+    Sea.material.uniforms.time.value += delta;
 
     controls.update( Date.now() - time );
     frustum.setFromMatrix( new THREE.Matrix4().multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse ) );
@@ -1475,10 +1477,19 @@ for (var i=0; i<final_objs.length; i++) {
     final_objs[i].visible = frustum.intersectsObject( final_objs[i] );
 }
 
+var v = clock.elapsedTime /100 % 1;
+if (v>0.9) 
+    sunround=false;
+if (v<0.1) 
+    sunround=true;
 
-skyUniforms.bottomColor.value.r = clock.elapsedTime /100 % 1;
-skyUniforms.bottomColor.value.g = clock.elapsedTime /100 % 1;
-skyUniforms.bottomColor.value.b = clock.elapsedTime /100 % 1;
+var e = 0
+if  (!sunround) e = 1 - v;
+else e = v;
+
+skyUniforms.bottomColor.value.r = e;
+skyUniforms.bottomColor.value.g = e;
+skyUniforms.bottomColor.value.b = e;
 
     renderer.render( scene, camera );
 
@@ -1595,6 +1606,7 @@ function setUniforms() {
 var _leaves  = new Array();
 var _trees  = new Array();
 var skyUniforms;
+var Sea;
 initScene = function() {
     clock = new THREE.Clock();
     // RENDERER
@@ -1700,7 +1712,11 @@ var vertexShader = document.getElementById( 'skyVertexShader' ).textContent;
 
                 var sky = new THREE.Mesh( skyGeo, skyMat );
                 scene.add( sky );
+///LENS FLARE / SUN
 
+/*
+view-source:http://threejs.org/examples/webgl_lensflares.html
+*/
 
     // MISC
     sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
@@ -1769,43 +1785,32 @@ ground_material.color.setHSL( 0.095, 1, 0.75 );
     //NATURE
     loadNature();
 
-
     var noiseTexture = new THREE.ImageUtils.loadTexture( 'cloud.png' );
     noiseTexture.wrapS = noiseTexture.wrapT = THREE.RepeatWrapping; 
         
 
-    var waterTexture = new THREE.ImageUtils.loadTexture( 'water.png' );
-    waterTexture.wrapS = waterTexture.wrapT = THREE.RepeatWrapping; 
+Sea = new THREE.FlatMirror(renderer, camera, {
+        clipBias: 0.003, 
+        textureWidth: 800, textureHeight: 600, 
+        color:0x333366, 
+        baseTexture: THREE.ImageUtils.loadTexture("water.png"),
+        baseSpeed: 0.01,
+        noiseTexture: noiseTexture,
+        noiseScale: 0.02,
+        alpha:  0.8,
+        time:   0.0,
+    });
     
-    // use "this." to create global object
-    customUniforms2 = {
-        baseTexture:    { type: "t", value: waterTexture },
-        baseSpeed:      { type: "f", value: 0.005 },
-        noiseTexture:   { type: "t", value: noiseTexture },
-        noiseScale:     { type: "f", value: 0.2 },
-        alpha:          { type: "f", value: 0.8 },
-        time:           { type: "f", value: 1.0 }
-    };
+    var SeaMesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(800, 800, 30, 30), 
+        Sea.material 
+    );
+    Sea.material.side = THREE.DoubleSide;
+    SeaMesh.add(Sea);
 
-    // create custom material from the shader code above
-    //   that is within specially labeled script tags
-    var customMaterial2 = new THREE.ShaderMaterial( 
-    {
-        uniforms: customUniforms2,
-        vertexShader:   document.getElementById( 'waterVertexShader'   ).textContent,
-        fragmentShader: document.getElementById( 'waterFragmentShader' ).textContent
-    }   );
- 
-    // other material properties
-    customMaterial2.side = THREE.DoubleSide;
-    customMaterial2.transparent = true;
-    
-    // apply the material to a surface
-    var flatGeometry = new THREE.PlaneGeometry( 1024, 1024 );
-    var water_surface = new THREE.Mesh( flatGeometry, customMaterial2 );
-
-    scene.add(water_surface);
-    water_surface.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
+    SeaMesh.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
+    SeaMesh.position.set(0,-5,0);
+    scene.add(SeaMesh);  
 
     renderer.setClearColor( scene.fog.color, 1 );
 
