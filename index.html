@@ -31,6 +31,14 @@
 		<script src="simplex-noise.js"></script>
 		<script src="ShaderWater.js"></script>
 	    <script src="physi.js"></script>
+	    <style type="text/css">
+	    #mapdiv {
+		background-image : url(texture.jpg);
+		float : right;
+		width : 64px;
+		height : 64px;
+		}
+		</style>
 <script id="waterVertexShader" type="x-shader/x-vertex">
 varying vec2 vUv;
 void main() 
@@ -130,7 +138,7 @@ void main()
 								<div id="logrender" style="display:none;width:900px;font-size:8px;height:300px;overflow-y:auto;"></div>
 							  </div>
 							<div id="logDiv">
-						</div>
+							</div>
 					</div>
 				</article>
 			</section>
@@ -139,5 +147,11 @@ void main()
 				<p>Copyright 2013 / 2014 : emmanuel.botros@gmail.com</p> 
 			</footer>
 		</section>
+		<div id="mapDiv" style="z-index:1000;background-image : url(texture.jpg);position:absolute;top:3px;right:3px;width : 128px;height : 128px;background-size: 100%;">
+		</div>
+		<div id="mapDiv" style="z-index:1000;background-image : url(texture.jpg);position:absolute;top:3px;right:3px;width : 128px;height : 128px;background-size: 100%;">
+		</div>
+		<div id="posDiv" style="z-index:1000;background-image : url(location.png);position:absolute;top:52px;right:56px;width : 16px;height : 16px;background-size: 100%;">
+		</div>
 	</body>
 </html>

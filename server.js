@@ -313,6 +313,7 @@ fu.get("/lensflare1.png", fu.staticHandler("lensflare1.png"));
 fu.get("/lensflare2.png", fu.staticHandler("lensflare2.png"));
 fu.get("/water.png", fu.staticHandler("water.png"));
 fu.get("/ShaderWater.js", fu.staticHandler("ShaderWater.js"));
+fu.get("/location.png", fu.staticHandler("location.png"));
 
 fu.get("/nature.js", fu.staticHandler("nature.js"));
 

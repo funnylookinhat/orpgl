@@ -546,7 +546,7 @@ spawnBox()
 
         yawObject.translateX( velocity.x );
         yawObject.translateZ( velocity.z );
-        nh =getH(yawObject.position.x ,-yawObject.position.z)+.5;
+        nh =getH(yawObject.position.x/4 ,-yawObject.position.z/4)+0.5;
         if (yawObject.position.y < nh && (yawObject.position.y - nh) < -.01)
         yawObject.translateY( .2 )
         if (yawObject.position.y > nh && (yawObject.position.y - nh) > .01)
@@ -903,11 +903,11 @@ var grassMesh, grassGeometry, grassMaterial;
                 
                 var mesh = new THREE.Mesh( geometry, material );
                 mesh.scale.set(0.2, Math.random() * 0.2 + 0.2, 0.2);
-                mesh.position.x = Math.random() * 240-120;
-                mesh.position.z = Math.random() * 240-120;
+                mesh.position.x = Math.random() * 512-256;
+                mesh.position.z = Math.random() * 512-256;
                 var i=0;
                 var h = 0;
-                h = getH(mesh.position.x ,-mesh.position.z)-0.5;
+                h = getH(mesh.position.x/4 ,-mesh.position.z/4)-0.5;
                 if (h<3&&h>-5) {
                 
                    mesh.scale.set(0.1, Math.random() * 0.2 + 0.1, 0.1);                
@@ -939,12 +939,12 @@ var grassMesh, grassGeometry, grassMaterial;
         for ( var i = idxstart; i < idxend; i ++ ) {
             var x = naturePos[0][i];
             var z = naturePos[1][i];
-if (getH(x,-z) < -5 ) continue;
+if (getH(x/4,-z/4) < -5 ) continue;
             var morph = new THREE.Mesh( geometry, faceMaterial );
             var s = THREE.Math.randFloat( 0.00075, 0.001 );
             morph.scale.set( s, s, s );
             morph.name="tree"
-            morph.position.set( x, getH(x,-z)-0.5, z );
+            morph.position.set( x, getH(x/4,-z/4)-0.5, z );
             morph.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
 
             scene.add( morph );
@@ -972,7 +972,7 @@ if (getH(x,-z) < -5 ) continue;
 
             var x = naturePos[0][i];
             var z = naturePos[1][i];
-if (getH(x,-z) < -5 ) continue;
+if (getH(x/4,-z/4) < -5 ) continue;
 
             var faceMaterial = new THREE.MeshBasicMaterial({ map: THREE.ImageUtils.loadTexture( 'branch1.png'), transparent: true, depthWrite: false, depthTest: true});
             var morph2 = new THREE.Mesh( geometry, faceMaterial );
@@ -980,7 +980,7 @@ if (getH(x,-z) < -5 ) continue;
             morph2.scale.set( s, s, s );
             morph2.name="tree"
             
-            morph2.position.set( x, getH(x,-z)-0.5, z );
+            morph2.position.set( x, getH(x/4,-z/4)-0.5, z );
             morph2.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
             scene.add( morph2 );
             morphs.push( morph2 );
@@ -1054,8 +1054,13 @@ function checkPos(camera){
             myPos.z=Math.floor(camera.position.z);
             willsend=true;
     }
-    if (willsend == true)
+    if (willsend == true) {
         send(JSON.stringify(myPos,replacer));
+        var xp=(52)-myPos.x/1024*128;        
+        var yp=-(-myPos.z/1024*128-(56));
+        document.getElementById("posDiv").style.right=xp+'px';
+        document.getElementById("posDiv").style.top=yp+'px';
+   }
 }
 
 var box;
@@ -1493,7 +1498,7 @@ view-source:http://threejs.org/examples/webgl_lensflares.html
     scene.add( controls.getObject() );
 
     var waterWidth = 1024, waterDepth = 1024;
-    var worldWidth = 256, worldDepth = 256,
+    var worldWidth = 1024, worldDepth = 1024,
     data = groundGeometry;
 
     // GROUND
@@ -1503,14 +1508,14 @@ view-source:http://threejs.org/examples/webgl_lensflares.html
         .3 // low restitution
     );
     ground_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
-    ground_material.map.repeat.set( 3, 3 );
+    ground_material.map.repeat.set( 1, 1 );
 ground_material.color.setHSL( 0.095, 1, 0.75 );
 
     var NoiseGen = new SimplexNoise;
 
-    var ground_geometry = new THREE.PlaneGeometry( 256, 256, worldWidth - 1, worldDepth - 1 );
+    var ground_geometry = new THREE.PlaneGeometry( worldWidth, worldDepth, worldWidth/4 - 1, worldDepth/4 - 1 );
     for ( var i = 0, l = ground_geometry.vertices.length; i < l; i ++ ) {
-        ground_geometry.vertices[ i ].z = data[ i ]/5-10;//NoiseGen.noise( ground_geometry.vertices[ i ].x / 20, ground_geometry.vertices[ i ].y / 20 ) * 10;
+        ground_geometry.vertices[ i ].z = data[ i ]/3-10;//NoiseGen.noise( ground_geometry.vertices[ i ].x / 20, ground_geometry.vertices[ i ].y / 20 ) * 10;
     }
     ground_geometry.computeFaceNormals();
     ground_geometry.computeVertexNormals();
@@ -1525,9 +1530,9 @@ ground_material.color.setHSL( 0.095, 1, 0.75 );
     ground.receiveShadow = true;
 
     for ( var i = 0, l = ground.geometry.vertices.length; i < l; i ++ ) {
-        if (heights[Math.floor(ground.geometry.vertices[ i ].x)] == undefined)
-        heights[""+Math.floor(ground.geometry.vertices[ i ].x)] = {};
-        heights[""+Math.floor(ground.geometry.vertices[ i ].x)][""+Math.floor(ground.geometry.vertices[ i ].y)]=ground.geometry.vertices[ i ].z;
+        if (heights[Math.floor(ground.geometry.vertices[ i ].x/4)] == undefined)
+        heights[""+Math.floor(ground.geometry.vertices[ i ].x/4)] = {};
+        heights[""+Math.floor(ground.geometry.vertices[ i ].x/4)][""+Math.floor(ground.geometry.vertices[ i ].y/4)]=ground.geometry.vertices[ i ].z;
   
     }
 
