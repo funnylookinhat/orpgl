@@ -14,7 +14,7 @@ var t = 0;
 var don=false;
 var movementSpeed = 0.3;
 var frame=0;
-var lastpos=null;
+var lastposs=new Array();
 
 THREE.Euler = function ( x, y, z, order ) {
 
@@ -1176,7 +1176,9 @@ skyUniforms.bottomColor.value.g = e;
 skyUniforms.bottomColor.value.b = e;
 for (var prop in myJSONUserPosArray2) {
             var tt = JSON.parse(myJSONUserPosArray2[prop])
-        if ((    lastpos!=myJSONUserPosArray2[prop]) && (prop !=CONFIG.nick)) {
+        if ((    lastposs[prop]!=myJSONUserPosArray2[prop]) && (prop !=CONFIG.nick)) {
+            console.log(prop+' !='+CONFIG.nick+'&& '+lastposs[prop]+'!='+myJSONUserPosArray2[prop]);
+            var xc,yc,zc=0;
             for (var prop2 in tt) {
             if (prop2='x')
                 xc=tt[prop2];
@@ -1188,8 +1190,16 @@ for (var prop in myJSONUserPosArray2) {
             android.position.x=xc;
             android.position.y=yc;
             android.position.z=zc;
+
+            var xp=(52)-xc/1024*128;        
+            var yp=-(zc/1024*128-(56));
+
+            document.getElementById("pos2Div").style.display='';
+            document.getElementById("pos2Div").style.right=xp+'px';
+            document.getElementById("pos2Div").style.top=yp+'px';
+
         }
-        lastpos=myJSONUserPosArray2[prop]
+       lastposs[prop]=myJSONUserPosArray2[prop]
 
     }
     renderer.render( scene, camera );
