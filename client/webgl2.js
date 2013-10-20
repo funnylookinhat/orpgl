@@ -409,8 +409,8 @@ THREE.PointerLockControls = function ( camera ) {
         var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
         var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-        yawObject.rotation.y -= movementX * 0.002;
-        pitchObject.rotation.x -= movementY * 0.002;
+        yawObject.rotation.y -= movementX * 0.004;
+        pitchObject.rotation.x -= movementY * 0.004;
 
         pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
 
@@ -940,6 +940,9 @@ var grassMesh, grassGeometry, grassMaterial;
             var x = naturePos[0][i];
             var z = naturePos[1][i];
 if (getH(x/4,-z/4) < -5 ) continue;
+            faceMaterial.map.wrapS = faceMaterial.map.wrapT = THREE.RepeatWrapping;
+            faceMaterial.map.repeat.set( 1, 1 );
+
             var morph = new THREE.Mesh( geometry, faceMaterial );
             var s = THREE.Math.randFloat( 0.00075, 0.001 );
             morph.scale.set( s, s, s );
@@ -974,7 +977,10 @@ if (getH(x/4,-z/4) < -5 ) continue;
             var z = naturePos[1][i];
 if (getH(x/4,-z/4) < -5 ) continue;
 
-            var faceMaterial = new THREE.MeshBasicMaterial({ map: THREE.ImageUtils.loadTexture( 'branch1.png'), transparent: true, depthWrite: false, depthTest: true});
+            var faceMaterial = new THREE.MeshBasicMaterial({ map: leafsprite, transparent: true, depthWrite: false, depthTest: true});
+            faceMaterial.map.wrapS = faceMaterial.map.wrapT = THREE.RepeatWrapping;
+            faceMaterial.map.repeat.set( 0.7,0.7 );
+
             var morph2 = new THREE.Mesh( geometry, faceMaterial );
             var s = THREE.Math.randFloat( 0.00075, 0.001 );
             morph2.scale.set( s, s, s );
@@ -992,9 +998,9 @@ if (getH(x/4,-z/4) < -5 ) continue;
 
 function loadNature() {     
     var loader = new THREE.JSONLoader();
-    loadtrees(loader,10,5,'sprite1',1,0,199,"amplitude","previousRender",attributesS6,"displacement",10,10,10,1  );
-    //loadtrees(loader,3.4,5,'sprite1',1,200,399,"amplitude","previousRender",attributesS6,"displacement",10,10,3,1);
-    //loadtrees(loader,6,20,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2");
+    loadtrees(loader,10,5,sprite1,1,0,199,"amplitude","previousRender",attributesS6,"displacement",10,10,10,1  );
+    loadtrees(loader,3.4,5,sprite2,1,200,399,"amplitude","previousRender",attributesS6,"displacement",10,10,3,1);
+    loadtrees(loader,20,15,sprite3,1,400,500,"amplitude","previousRender",attributesS6,"displacement",30,3,5,1);
 }
 
 function onWindowResize( event ) {
@@ -1021,6 +1027,13 @@ for ( var i = 0, il = grassGeometry.vertices.length / 2 - 1; i <= il; i ++ ) {
 */
 //    controls.update( Date.now() - time );
     //time = Date.now() - time ;
+
+ 
+//Sunlight.position.x=Math.floor(Math.cos( clock.getDelta() ) * 200);
+//lensFlare.position.x=Math.floor(Math.cos( clock.getDelta() ) * 200);
+//Sun.position.x = Math.floor(Math.cos( clock.elapsedTime ) * 200);
+//  Sun.position.y = Math.floor(Math.sin( clock.getDelta() ) * 200);
+
     Sea.render();
     render();
 }
@@ -1202,6 +1215,13 @@ for (var prop in myJSONUserPosArray2) {
        lastposs[prop]=myJSONUserPosArray2[prop]
 
     }
+    Sun.position.x = (Math.cos( clock.elapsedTime /100) * 390)+5;
+    Sunlight.position.x = (Math.cos( clock.elapsedTime /100) * 390);
+    lensFlare.position.x = (Math.cos( clock.elapsedTime /100) * 390);
+    Sun.position.y = (Math.sin( clock.elapsedTime /100) * 390)+5;
+    Sunlight.position.y = (Math.sin( clock.elapsedTime /100) * 390);
+    lensFlare.position.y = (Math.sin( clock.elapsedTime /100) * 390);
+
     renderer.render( scene, camera );
 
     time = Date.now();
@@ -1317,7 +1337,7 @@ function setUniforms() {
 var _leaves  = new Array();
 var _trees  = new Array();
 var skyUniforms;
-var Sea;
+var Sea,Sun,Sunlight,lensFlare ;
 var android;
 initScene = function() {
     clock = new THREE.Clock();
@@ -1437,25 +1457,25 @@ view-source:http://threejs.org/examples/webgl_lensflares.html
     );
 
     Sun_material.opacity = 0.6;
-    var Sun = new THREE.Mesh(Sun_geometry,Sun_material);
+    Sun = new THREE.Mesh(Sun_geometry,Sun_material);
     var textureFlare0 = THREE.ImageUtils.loadTexture( "lensflare0.png" );
    // var textureFlare2 = THREE.ImageUtils.loadTexture( "lensflare1.png" );
    // var textureFlare3 = THREE.ImageUtils.loadTexture( "lensflare2.png" );
-    addLight( 0.55, 0.9, 0.5, 390, 10, 0 );
-    Sun.position.set( 395,10,0 );
+    addLight( 0.55, 0.9, 0.5, 190, 50, 0 );
+    Sun.position.set( 195,50,0 );
     scene.add( Sun );
 
     function addLight( h, s, l, x, y, z ) {
 
-        var light = new THREE.PointLight( 0xffffff, 1.5, 4500 );
-        light.color.setHSL( h, s, l );
-        light.position.set( x, y, z );
-        scene.add( light );
+        Sunlight = new THREE.PointLight( 0xffffff, 1.5, 4500 );
+        Sunlight.color.setHSL( h, s, l );
+        Sunlight.position.set( x, y, z );
+        scene.add( Sunlight );
 
         var flareColor = new THREE.Color( 0xffffff );
         flareColor.setHSL( h, s, l + 0.5 );
 
-        var lensFlare = new THREE.LensFlare( textureFlare0, 700, 0.0, THREE.AdditiveBlending, flareColor );
+        lensFlare = new THREE.LensFlare( textureFlare0, 700, 0.0, THREE.AdditiveBlending, flareColor );
 /*
         lensFlare.add( textureFlare2, 512, 0.0, THREE.AdditiveBlending );
         lensFlare.add( textureFlare2, 512, 0.0, THREE.AdditiveBlending );
@@ -1467,7 +1487,7 @@ view-source:http://threejs.org/examples/webgl_lensflares.html
         lensFlare.add( textureFlare3, 70, 1.0, THREE.AdditiveBlending );
 */
         lensFlare.customUpdateCallback = lensFlareUpdateCallback;
-        lensFlare.position = light.position;
+        lensFlare.position = Sunlight.position;
 
         scene.add( lensFlare );
 
@@ -1498,6 +1518,7 @@ view-source:http://threejs.org/examples/webgl_lensflares.html
     // MISC
     sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
     sprite2 = THREE.ImageUtils.loadTexture( "branch2.png", null );
+    sprite3 = THREE.ImageUtils.loadTexture( "branch3.png", null );
 
     camera.position.set( myPos.x,myPos.y,myPos.z);
     
