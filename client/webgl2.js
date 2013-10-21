@@ -902,7 +902,7 @@ var grassMesh, grassGeometry, grassMaterial;
                 geometry.faces[3].vertexColors[2] = geometry.faces[2].vertexColors[2];
                 
                 var mesh = new THREE.Mesh( geometry, material );
-                mesh.scale.set(0.2, Math.random() * 0.2 + 0.2, 0.2);
+                mesh.scale.set(0.1, Math.random() * 0.2 + 0.2, 0.1);
                 mesh.position.x = Math.random() * 512-256;
                 mesh.position.z = Math.random() * 512-256;
                 var i=0;
@@ -1174,19 +1174,12 @@ for (var i=0; i<final_objs.length; i++) {
     final_objs[i].visible = frustum.intersectsObject( final_objs[i] );
 }
 
-var v = clock.elapsedTime /100 % 1;
-if (v>0.9) 
-    sunround=false;
-if (v<0.1) 
-    sunround=true;
-
-var e = 0
-if  (!sunround) e = 1 - v;
-else e = v;
-
+var v = Math.cos( clock.elapsedTime /100)%1;
+var e = v;
 skyUniforms.bottomColor.value.r = e;
 skyUniforms.bottomColor.value.g = e;
 skyUniforms.bottomColor.value.b = e;
+scene.fog.color.setRGB(e,e,e);
 for (var prop in myJSONUserPosArray2) {
             var tt = JSON.parse(myJSONUserPosArray2[prop])
         if ((    lastposs[prop]!=myJSONUserPosArray2[prop]) && (prop !=CONFIG.nick)) {
@@ -1215,12 +1208,12 @@ for (var prop in myJSONUserPosArray2) {
        lastposs[prop]=myJSONUserPosArray2[prop]
 
     }
-    Sun.position.x = (Math.cos( clock.elapsedTime /100) * 390)+5;
-    Sunlight.position.x = (Math.cos( clock.elapsedTime /100) * 390);
-    lensFlare.position.x = (Math.cos( clock.elapsedTime /100) * 390);
-    Sun.position.y = (Math.sin( clock.elapsedTime /100) * 390)+5;
-    Sunlight.position.y = (Math.sin( clock.elapsedTime /100) * 390);
-    lensFlare.position.y = (Math.sin( clock.elapsedTime /100) * 390);
+    Sun.position.x = (Math.cos( clock.elapsedTime /50) * 390)+5;
+    Sunlight.position.x = (Math.cos( clock.elapsedTime /50) * 390);
+    lensFlare.position.x = (Math.cos( clock.elapsedTime /50) * 390);
+    Sun.position.y = (Math.sin( clock.elapsedTime /50) * 390)+5;
+    Sunlight.position.y = (Math.sin( clock.elapsedTime /50) * 390);
+    lensFlare.position.y = (Math.sin( clock.elapsedTime /50) * 390);
 
     renderer.render( scene, camera );
 
