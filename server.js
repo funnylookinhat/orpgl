@@ -316,6 +316,7 @@ fu.get("/water.png", fu.staticHandler("water.png"));
 fu.get("/ShaderWater.js", fu.staticHandler("ShaderWater.js"));
 fu.get("/location.png", fu.staticHandler("location.png"));
 fu.get("/location2.png", fu.staticHandler("location2.png"));
+fu.get("/grass_billboard.png", fu.staticHandler("grass_billboard.png"));
 
 fu.get("/nature.js", fu.staticHandler("nature.js"));
 
