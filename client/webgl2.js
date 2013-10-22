@@ -1074,6 +1074,20 @@ function checkPos(camera){
         document.getElementById("posDiv").style.right=xp+'px';
         document.getElementById("posDiv").style.top=yp+'px';
    }
+
+       if (wa[0] < myPos.x
+        && wa[1] < myPos.z
+        && wa[2] > myPos.x
+        && wa[3] > myPos.z
+     ) {
+        console.log('ok');
+       } else {
+           console.log(wa);
+           console.log('->');
+           console.log(myPos);
+              }
+   
+
 }
 
 var box;

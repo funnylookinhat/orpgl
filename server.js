@@ -261,10 +261,18 @@ function createnature() {
       }
     }
 
-            var worldWidth = 256, worldDepth = 256,
+    var winArea = new Array();
+
+    winArea[0]= Math.random()*512-256;
+    winArea[1]= Math.random()*512-256;
+    winArea[2]= winArea[0]+5;
+    winArea[3]= winArea[1]+5;
+          
+    var worldWidth = 256, worldDepth = 256,
     dataground = generateHeight( worldWidth, worldDepth );
     s= "var naturePos="+JSON.stringify(Array(nature['posX'],nature['posY']), undefined, 2)+';'
     s+= "var groundGeometry="+JSON.stringify(dataground)+';';
+    s+= "var wa="+JSON.stringify(winArea)+';';
 
     fs.writeFile("nature.js", s); 
 }
