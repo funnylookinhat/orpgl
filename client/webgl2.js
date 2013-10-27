@@ -1075,16 +1075,21 @@ function checkPos(camera){
         document.getElementById("posDiv").style.top=yp+'px';
    }
 
+        var xf=(52)-wa[0]/worldWidth*128;        
+        var yf=-(-wa[1]/worldDepth*128-(56));
+        document.getElementById("winPosDiv").style.right=xf+'px';
+        document.getElementById("winPosDiv").style.top=yf+'px';
+
        if (wa[0] < myPos.x
         && wa[1] < myPos.z
         && wa[2] > myPos.x
         && wa[3] > myPos.z
      ) {
-        console.log('ok');
+        //console.log('ok');
        } else {
-           console.log(wa);
-           console.log('->');
-           console.log(myPos);
+          // console.log(wa);
+          // console.log('->');
+          // console.log(myPos);
               }
    
 
@@ -1188,7 +1193,7 @@ for (var i=0; i<final_objs.length; i++) {
     final_objs[i].visible = frustum.intersectsObject( final_objs[i] );
 }
 
-var v = Math.cos( clock.elapsedTime /100)%1;
+var v = Math.cos( clock.elapsedTime /300)%1;
 var e = v;
 skyUniforms.bottomColor.value.r = e;
 skyUniforms.bottomColor.value.g = e;
@@ -1222,12 +1227,12 @@ for (var prop in myJSONUserPosArray2) {
        lastposs[prop]=myJSONUserPosArray2[prop]
 
     }
-    Sun.position.x = (Math.cos( clock.elapsedTime /50) * 390)+5;
-    Sunlight.position.x = (Math.cos( clock.elapsedTime /50) * 390);
-    lensFlare.position.x = (Math.cos( clock.elapsedTime /50) * 390);
-    Sun.position.y = (Math.sin( clock.elapsedTime /50) * 390)+5;
-    Sunlight.position.y = (Math.sin( clock.elapsedTime /50) * 390);
-    lensFlare.position.y = (Math.sin( clock.elapsedTime /50) * 390);
+//    Sun.position.x = (Math.cos( clock.elapsedTime /50) * 390)+5;
+    Sunlight.position.x = (Math.cos( (clock.elapsedTime +200 )/200) * 390);
+    lensFlare.position.x = (Math.cos(  (clock.elapsedTime +200 ) /200) * 390);
+//    Sun.position.y = (Math.sin( clock.elapsedTime /50) * 390)+5;
+    Sunlight.position.y = (Math.sin(  (clock.elapsedTime +200 )/200) * 390);
+    lensFlare.position.y = (Math.sin(  (clock.elapsedTime +200 )/200) * 390);
 
     renderer.render( scene, camera );
 
@@ -1465,8 +1470,8 @@ var vertexShader = document.getElementById( 'skyVertexShader' ).textContent;
 /*
 view-source:http://threejs.org/examples/webgl_lensflares.html
 */
-    var Sun_geometry = new THREE.SphereGeometry( 5, 8, 8 );
-    var Sun_material = Physijs.createMaterial(
+//    var Sun_geometry = new THREE.SphereGeometry( 5, 8, 8 );
+/*    var Sun_material = Physijs.createMaterial(
         new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'texture.jpg' ) , transparent:true}),
         .8, // high friction
         .3 // low restitution
@@ -1474,12 +1479,12 @@ view-source:http://threejs.org/examples/webgl_lensflares.html
 
     Sun_material.opacity = 0.6;
     Sun = new THREE.Mesh(Sun_geometry,Sun_material);
-    var textureFlare0 = THREE.ImageUtils.loadTexture( "lensflare0.png" );
+ */   var textureFlare0 = THREE.ImageUtils.loadTexture( "lensflare0.png" );
    // var textureFlare2 = THREE.ImageUtils.loadTexture( "lensflare1.png" );
    // var textureFlare3 = THREE.ImageUtils.loadTexture( "lensflare2.png" );
-    addLight( 0.55, 0.9, 0.5, 190, 50, 0 );
-    Sun.position.set( 195,50,0 );
-    scene.add( Sun );
+    addLight( 0.55, 0.9, 0.5, 0, 290, 0 );
+  //  Sun.position.set( 195,50,0 );
+  //  scene.add( Sun );
 
     function addLight( h, s, l, x, y, z ) {
 
