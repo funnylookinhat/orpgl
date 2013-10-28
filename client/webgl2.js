@@ -1052,9 +1052,40 @@ function replacer(key, value) {
     }
     return value;
 }
-
+var oldval=0;
 function checkPos(camera){
     var willsend=false;
+            myPos.rx=Math.floor(camera.rotation.x);
+            myPos.ry=Math.floor(camera.rotation.y);
+            myPos.rz=Math.floor(camera.rotation.z);
+
+              var posdiv = document.getElementById("posDiv");
+        posdiv.style.right=xp+'px';
+        posdiv.style.top=yp+'px';
+var angle = 0;
+var st = window.getComputedStyle(posdiv, null);
+var tr = st.getPropertyValue("-webkit-transform") ||
+         st.getPropertyValue("-moz-transform") ||
+         st.getPropertyValue("-ms-transform") ||
+         st.getPropertyValue("-o-transform") ||
+         st.getPropertyValue("transform") ||
+         "FAIL";
+if (tr != "none") {
+var values = tr.split('(')[1].split(')')[0].split(',');
+var a = values[0];
+var b = values[1];
+var c = values[2];
+var d = values[3];
+
+var scale = Math.sqrt(a*a + b*b);
+var sin = b/scale;
+
+angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
+}
+
+        var transformProperty = Modernizr.prefixed('transform');
+        posdiv.style[transformProperty] = 'rotate('+(-(myPos.ry*10)-angle)+'deg)';
+
     if ((Math.floor(camera.position.x)<myPos.x) || (Math.floor(camera.position.x)>myPos.x)){
         myPos.x=Math.floor(camera.position.x);
         willsend=true;
@@ -1071,8 +1102,9 @@ function checkPos(camera){
         send(JSON.stringify(myPos,replacer));
         var xp=(52)-myPos.x/worldWidth*128;        
         var yp=-(-myPos.z/worldDepth*128-(56));
-        document.getElementById("posDiv").style.right=xp+'px';
-        document.getElementById("posDiv").style.top=yp+'px';
+        var posdiv = document.getElementById("posDiv");
+        posdiv.style.right=xp+'px';
+        posdiv.style.top=yp+'px';
    }
 
         var xf=(52)-wa[0]/worldWidth*128;        
@@ -1085,7 +1117,7 @@ function checkPos(camera){
         && wa[2] > myPos.x
         && wa[3] > myPos.z
      ) {
-        //console.log('ok');
+        console.log('ok');
        } else {
           // console.log(wa);
           // console.log('->');
@@ -1361,6 +1393,25 @@ var grassCount = 3000;
     var worldWidth = 512, worldDepth = 512,
 
 initScene = function() {
+
+var FizzyText = function() {
+  this.message = 'dat.gui';
+  this.speed = 0.8;
+  this.displayOutline = false;
+};
+
+  var text = new FizzyText();
+  var gui = new dat.GUI();
+  gui.add(text, 'message');
+  gui.add(text, 'speed', -5, 5);
+  gui.add(text, 'displayOutline');
+
+gui.domElement.style.position = 'absolute';
+gui.domElement.style.top = '0px';
+gui.domElement.style.right = '130px';
+
+document.body.appendChild( gui.domElement );
+
     clock = new THREE.Clock();
     // RENDERER
     renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -1635,12 +1686,8 @@ grassMap.magFilter = THREE.NearestFilter; grassMap.minFilter = THREE.NearestFilt
 
     function addModelToScene( geometry, materials )
     {
-        // for preparing animation
-        for (var i = 0; i < materials.length; i++)
-            materials[i].morphTargets = true;
-
-        var material = new THREE.MeshFaceMaterial( materials );
-        android = new THREE.Mesh( geometry, material );
+       
+        android = new THREE.Mesh( geometry, grassMaterial );
         android.scale.set(.1,.1,.1);
         android.position.y = getH(0 ,0);
         scene.add( android );
