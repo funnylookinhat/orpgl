@@ -42,6 +42,54 @@
 		height : 64px;
 		}
 		</style>
+
+
+		<script id="furShader" type="x-shader/x-fragment">
+			
+			uniform float layer;
+			
+			uniform sampler2D texture1;
+			
+			varying vec2 vUv;
+			
+			void main()
+			{
+				float length = dot(texture2D(texture1, vUv).xyz, vec3(20, 70, 10));
+				gl_FragColor = texture2D( texture1, vUv );
+			}
+		</script>
+
+		<script id="furVertexShader" type="x-shader/x-vertex">
+			
+			uniform float layer;
+			uniform float time;
+			
+			uniform vec2 uvScale;
+			uniform vec2 wind;
+			
+			varying vec2 vUv;
+			varying vec3 vNormal;
+
+			void main()
+			{
+				vUv = uvScale * uv;
+				vNormal = normal;
+				
+				vec4 gravity = projectionMatrix * modelViewMatrix * vec4(0.0, -1.0, 0.0, 0.0) * 0.01 + vec4(wind.x, 0.0, wind.y, 0.0);
+				
+				float dif = (1.0 - layer);
+				float up = 1.0 - (dif * dif);
+				
+				vec3 pos = position + vNormal * up * 0.1 + gravity.xyz * time;
+				
+				vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );
+				gl_Position = projectionMatrix * mvPosition;
+
+			}
+
+		</script>
+
+
 <script id="waterVertexShader" type="x-shader/x-vertex">
 varying vec2 vUv;
 void main() 

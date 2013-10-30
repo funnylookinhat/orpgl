@@ -868,7 +868,7 @@ spawnBox()
         }
 
 var grassMesh, grassGeometry, grassMaterial;
-            var grassCount = 3000;
+            var grassCount = 300;
 
             function generateRandomGrassLeaf( material ) {
                 var geometry = new THREE.Geometry(),
@@ -1070,7 +1070,7 @@ var tr = st.getPropertyValue("-webkit-transform") ||
          st.getPropertyValue("-o-transform") ||
          st.getPropertyValue("transform") ||
          "FAIL";
-if (tr != "none") {
+if (tr != "none" && tr != "matrix(1, 0, 0, 1, 0, 0)") {
 var values = tr.split('(')[1].split(')')[0].split(',');
 var a = values[0];
 var b = values[1];
@@ -1084,7 +1084,7 @@ angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
 }
 
         var transformProperty = Modernizr.prefixed('transform');
-        posdiv.style[transformProperty] = 'rotate('+(-(myPos.ry*10)-angle)+'deg)';
+        posdiv.style[transformProperty] = 'rotate('+(-myPos.ry * 57)+'deg)';
 
     if ((Math.floor(camera.position.x)<myPos.x) || (Math.floor(camera.position.x)>myPos.x)){
         myPos.x=Math.floor(camera.position.x);
@@ -1216,6 +1216,7 @@ render = function() {
 
     Sea.material.uniforms.time.value += delta;
 
+    furUniforms.time.value += delta*100;
     controls.update( Date.now() - time );
     frustum.setFromMatrix( new THREE.Matrix4().multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse ) );
 var objs = new Array();
@@ -1386,25 +1387,25 @@ var Sea,Sun,Sunlight,lensFlare ;
 var android;
 var  grassMeshes = [], grassGeometry, grassMaterial;
 var grassHeight = 5, grassWidth = 2;
-var grassCount = 3000;
+var grassCount = 300;
 
     var divisor = 2;
         var waterWidth = 1024, waterDepth = 1024;
-    var worldWidth = 512, worldDepth = 512,
-
+    var worldWidth = 512, worldDepth = 512;
+    var furUniforms;
 initScene = function() {
 
 var FizzyText = function() {
   this.message = 'dat.gui';
-  this.speed = 0.8;
-  this.displayOutline = false;
+//  this.speed = 0.8;
+//  this.displayOutline = false;
 };
 
   var text = new FizzyText();
   var gui = new dat.GUI();
   gui.add(text, 'message');
-  gui.add(text, 'speed', -5, 5);
-  gui.add(text, 'displayOutline');
+//  gui.add(text, 'speed', -5, 5);
+//  gui.add(text, 'displayOutline');
 
 gui.domElement.style.position = 'absolute';
 gui.domElement.style.top = '0px';
@@ -1677,6 +1678,32 @@ grassMap.magFilter = THREE.NearestFilter; grassMap.minFilter = THREE.NearestFilt
                     
                 }
 
+/*furUniforms = {
+                    
+                    texture1: { type: "t", value: THREE.ImageUtils.loadTexture( "grass_billboard.png" ) },
+                    time: { type: "f", value: 1.0 },
+                    resolution: { type: "v2", value: new THREE.Vector2() },
+                    uvScale: { type: "v2", value: new THREE.Vector2( 4.0, 2.0 ) },
+                    wind: { type: "v2", value: new THREE.Vector2( 10, 10 ) },
+                    layer: { type: "f", value: 0.0 }
+                    
+                };
+                
+                furUniforms.texture1.value.wrapS = furUniforms.texture1.value.wrapT = THREE.RepeatWrapping;
+                
+
+                var furMaterial = new THREE.ShaderMaterial( {
+
+                    uniforms: furUniforms,
+                    vertexShader: document.getElementById( 'furVertexShader' ).textContent,
+                    fragmentShader: document.getElementById( 'furShader' ).textContent,
+                    
+                } );
+                
+                var furMesh = new THREE.Mesh( new THREE.TorusGeometry( 1, 0.3, 60, 60 ), furMaterial );
+                
+                scene.add( furMesh );
+*/
     //NATURE
     loadNature();
 
@@ -1728,7 +1755,6 @@ Sea = new THREE.FlatMirror(renderer, camera, {
 
     renderer.shadowMapEnabled = true;
     renderer.shadowMapCullFace = THREE.CullFaceBack;
-    spawnBox(null);
     scene.simulate();
     animate();
     };
