@@ -1231,12 +1231,25 @@ render = function() {
 var objs = new Array();
 var final_objs = objs.concat(_leaves,_trees);
 var count=0;
-for (var i=0; i<final_objs.length; i++) {
-    final_objs[i].visible = frustum.intersectsObject( final_objs[i] );
-}
 
 
   var point1 = yawObject.position;
+
+
+for (var i=0; i<final_objs.length; i++) {
+    final_objs[i].visible = frustum.intersectsObject( final_objs[i] );
+
+if (final_objs[i].visible) {
+    var point2 = final_objs[i].position;
+    var distance = point1.distanceTo( point2 );
+    if (distance <150)
+    final_objs[i].visible = true;
+    else
+    final_objs[i].visible = false;
+}
+}
+
+
 
 var objs = new Array();
  var final_objs = objs.concat(_grass);
