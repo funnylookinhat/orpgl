@@ -390,6 +390,7 @@ THREE.PointerLockControls = function ( camera ) {
     yawObject.position.y = 0;
     yawObject.add( pitchObject );
 
+    var moveUpward = false;
     var moveForward = false;
     var moveBackward = false;
     var moveLeft = false;
@@ -441,6 +442,7 @@ THREE.PointerLockControls = function ( camera ) {
 
             case 32: // space
 
+                moveUpward = true;
 var vector = new THREE.Vector3( 0, 0, -1 );
 
 direct =vector.applyQuaternion( yawObject.quaternion );
@@ -453,9 +455,8 @@ direct =vector.applyQuaternion( yawObject.quaternion );
 direct =  direction.applyEuler( rotation );
 
 direct = direct.multiplyScalar( 5 );
-spawnBox()
-                if ( canJump === true ) velocity.y += 10;
-                canJump = false;
+//spawnBox()
+                velocity.y = 10;
                 break;
 
         }
@@ -484,6 +485,11 @@ spawnBox()
             case 39: // right
             case 68: // d
                 moveRight = false;
+                break;
+
+            case 32:
+
+                moveUpward = false;
                 break;
 
         }
@@ -541,6 +547,8 @@ spawnBox()
         if ( moveForward ) velocity.z -= 0.012 * delta;
         if ( moveBackward ) velocity.z += 0.012 * delta;
 
+        if ( moveUpward ) velocity.y = 3 * delta;
+
         if ( moveLeft ) velocity.x -= 0.012 * delta;
         if ( moveRight ) velocity.x += 0.012 * delta;
 
@@ -548,9 +556,11 @@ spawnBox()
         yawObject.translateZ( velocity.z );
         nh =getH(yawObject.position.x/divisor ,-yawObject.position.z/divisor)+0.5;
         if (yawObject.position.y < nh && (yawObject.position.y - nh) < -.01)
-        yawObject.translateY( .2 )
+        yawObject.translateY( .2 + velocity.y )
+        velocity.y = 0;
         if (yawObject.position.y > nh && (yawObject.position.y - nh) > .01)
         yawObject.translateY( -.2 ); 
+
      //console.log((nh - yawObject.position.y));
 
         checkPos(yawObject);
@@ -868,7 +878,6 @@ spawnBox()
         }
 
 var grassMesh, grassGeometry, grassMaterial;
-            var grassCount = 300;
 
             function generateRandomGrassLeaf( material ) {
                 var geometry = new THREE.Geometry(),
@@ -1117,7 +1126,7 @@ angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
         && wa[2] > myPos.x
         && wa[3] > myPos.z
      ) {
-        console.log('ok');
+        alert('you won !');
        } else {
           // console.log(wa);
           // console.log('->');
@@ -1220,18 +1229,34 @@ render = function() {
     controls.update( Date.now() - time );
     frustum.setFromMatrix( new THREE.Matrix4().multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse ) );
 var objs = new Array();
-var final_objs = objs.concat(_leaves,_trees,_grass);
+var final_objs = objs.concat(_leaves,_trees);
 var count=0;
 for (var i=0; i<final_objs.length; i++) {
     final_objs[i].visible = frustum.intersectsObject( final_objs[i] );
 }
+
+
+  var point1 = yawObject.position;
+
+var objs = new Array();
+ var final_objs = objs.concat(_grass);
+var count=0;
+for (var i=0; i<final_objs.length; i++) {
+    var point2 = final_objs[i].position;
+    var distance = point1.distanceTo( point2 );
+    if (distance <50)
+    final_objs[i].visible = true;
+    else
+    final_objs[i].visible = false;
+}
+   
 
 var v = Math.cos( clock.elapsedTime /300)%1;
 var e = v;
 skyUniforms.bottomColor.value.r = e;
 skyUniforms.bottomColor.value.g = e;
 skyUniforms.bottomColor.value.b = e;
-scene.fog.color.setRGB(e,e,e);
+scene.fog.color.setRGB(e/2,e/2,e/2);
 for (var prop in myJSONUserPosArray2) {
             var tt = JSON.parse(myJSONUserPosArray2[prop])
         if ((    lastposs[prop]!=myJSONUserPosArray2[prop]) && (prop !=CONFIG.nick)) {
@@ -1387,7 +1412,7 @@ var Sea,Sun,Sunlight,lensFlare ;
 var android;
 var  grassMeshes = [], grassGeometry, grassMaterial;
 var grassHeight = 5, grassWidth = 2;
-var grassCount = 300;
+var grassCount = 10000;
 
     var divisor = 2;
         var waterWidth = 1024, waterDepth = 1024;
@@ -1639,7 +1664,7 @@ ground_material.color.setHSL( 0.095, 1, 0.75 );
     }
 
     //GRASS
-    grassMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, side: THREE.DoubleSide } );
+/*    grassMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, side: THREE.DoubleSide } );
     grassGeometry = new THREE.Geometry();
     for ( var i = 0, l = grassCount; i < l; i++ ) {
         var leaf = generateRandomGrassLeaf( grassMaterial );
@@ -1651,7 +1676,8 @@ ground_material.color.setHSL( 0.095, 1, 0.75 );
     grassMesh = new THREE.Mesh( grassGeometry, grassMaterial );
     scene.add(grassMesh);
 
-                var grassGeometry = new THREE.PlaneGeometry( 2, 2, grassWidth - 1, grassHeight - 1 );
+  */              var grassGeometry = new THREE.SphereGeometry( 1, 4, 4 );
+                //new THREE.PlaneGeometry( 2, 2, grassWidth - 1, grassHeight - 1 );
                 grassGeometry.dynamic = true;
 
                 var grassMap = THREE.ImageUtils.loadTexture( 'grass_billboard.png' );
@@ -1678,7 +1704,7 @@ grassMap.magFilter = THREE.NearestFilter; grassMap.minFilter = THREE.NearestFilt
                     
                 }
 
-/*furUniforms = {
+furUniforms = {
                     
                     texture1: { type: "t", value: THREE.ImageUtils.loadTexture( "grass_billboard.png" ) },
                     time: { type: "f", value: 1.0 },
@@ -1700,10 +1726,13 @@ grassMap.magFilter = THREE.NearestFilter; grassMap.minFilter = THREE.NearestFilt
                     
                 } );
                 
-                var furMesh = new THREE.Mesh( new THREE.TorusGeometry( 1, 0.3, 60, 60 ), furMaterial );
-                
+                var furMesh = new THREE.Mesh( new THREE.SphereGeometry( 5, 32, 15 ), grassMaterial );
+
+                furMesh.position.x = wa[0]+2.5;
+                furMesh.position.z = wa[1]+2.5;
+                furMesh.position.y = getH(furMesh.position.x/divisor ,furMesh.position.z/divisor)+5;              
                 scene.add( furMesh );
-*/
+
     //NATURE
     loadNature();
 
