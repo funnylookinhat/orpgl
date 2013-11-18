@@ -1667,6 +1667,20 @@ ground_material.color.setHSL( 0.095, 1, 0.75 );
     ground.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
     ground.receiveShadow = true;
     scene.add( ground );
+    var cube_geometry = new THREE.CubeGeometry( 3, 3, 3 );
+        var cube_mesh = new THREE.Mesh( cube_geometry );
+    cube_mesh.position.y = 3;
+        cube_mesh.position.x = 7;
+    var smooth = cube_geometry;
+    smooth.mergeVertices();
+    smooth.computeCentroids();
+                smooth.computeFaceNormals();
+                smooth.computeVertexNormals();
+var modifier = new THREE.SubdivisionModifier(4);
+modifier.modify( smooth );
+var mesh = new THREE.Mesh( smooth, new THREE.MeshPhongMaterial( { color: 0x222222 } ) );
+scene.add( mesh );
+    
     ground.receiveShadow = true;
 
     for ( var i = 0, l = ground.geometry.vertices.length; i < l; i ++ ) {

@@ -328,7 +328,7 @@ fu.get("/grass_billboard.png", fu.staticHandler("grass_billboard.png"));
 fu.get("/flag.png", fu.staticHandler("flag.png"));
 fu.get("/dat.gui.min.js", fu.staticHandler("dat.gui.min.js"));
 fu.get("/modernizr.custom.19013.js", fu.staticHandler("modernizr.custom.19013.js"));
-
+fu.get("/SubdivisionModifier.js", fu.staticHandler("SubdivisionModifier.js"));
 fu.get("/nature.js", fu.staticHandler("nature.js"));
 
 fu.get("/who", function (req, res) {
