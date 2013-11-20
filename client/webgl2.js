@@ -1189,6 +1189,7 @@ for ( var i = 0, il = grassGeometry.vertices.length / 2 - 1; i <= il; i ++ ) {
 //  Sun.position.y = Math.floor(Math.sin( clock.getDelta() ) * 200);
 
     Sea.render();
+
     render();
 }
 function dod(){
@@ -1387,7 +1388,7 @@ for (var i=0; i<final_objs.length; i++) {
 if (final_objs[i].visible) {
     var point2 = final_objs[i].position;
     var distance = point1.distanceTo( point2 );
-    if (distance <150)
+    if (distance <250)
     final_objs[i].visible = true;
     else
     final_objs[i].visible = false;
@@ -1402,7 +1403,7 @@ var count=0;
 for (var i=0; i<final_objs.length; i++) {
     var point2 = final_objs[i].position;
     var distance = point1.distanceTo( point2 );
-    if (distance <50)
+    if (distance <10)
     final_objs[i].visible = true;
     else
     final_objs[i].visible = false;
@@ -1449,7 +1450,7 @@ for (var prop in myJSONUserPosArray2) {
 //    Sun.position.y = (Math.sin( clock.elapsedTime /50) * 390)+5;
     Sunlight.position.y = (Math.sin(  (clock.elapsedTime +200 )/200) * 390);
     lensFlare.position.y = (Math.sin(  (clock.elapsedTime +200 )/200) * 390);
-
+rendererStats.update(renderer);
     renderer.render( scene, camera );
 
     time = Date.now();
@@ -1570,13 +1571,15 @@ var Sea,Sun,Sunlight,lensFlare ;
 var android;
 var  grassMeshes = [], grassGeometry, grassMaterial;
 var grassHeight = 5, grassWidth = 2;
-var grassCount = 10000;
+var grassCount = 5000;
 
     var divisor = 2;
         var waterWidth = 1024, waterDepth = 1024;
     var worldWidth = 512, worldDepth = 512;
     var furUniforms;
+    var rendererStats;
 initScene = function() {
+ rendererStats   = new THREEx.RendererStats();
 
 var FizzyText = function() {
   this.message = 'dat.gui';
@@ -1835,6 +1838,10 @@ var mesh = new THREE.Mesh( smooth, new THREE.MeshPhongMaterial( { color: 0x22222
 scene.add( mesh );
     
     ground.receiveShadow = true;
+               var grassMap = THREE.ImageUtils.loadTexture( 'grass_billboard.png' );
+grassMap.magFilter = THREE.NearestFilter; grassMap.minFilter = THREE.NearestFilter; grassMap.generateMipmaps = false;
+
+                var grassMaterial = new THREE.MeshBasicMaterial( { map: grassMap, alphaTest: 0.8, side: THREE.DoubleSide } );
 
     for ( var i = 0, l = ground.geometry.vertices.length; i < l; i ++ ) {
         if (heights[Math.floor(ground.geometry.vertices[ i ].x/divisor)] == undefined)
@@ -1844,27 +1851,22 @@ scene.add( mesh );
     }
 
     //GRASS
-/*    grassMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, side: THREE.DoubleSide } );
+    grassMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, side: THREE.DoubleSide } );
     grassGeometry = new THREE.Geometry();
     for ( var i = 0, l = grassCount; i < l; i++ ) {
         var leaf = generateRandomGrassLeaf( grassMaterial );
         if (leaf) {
-            THREE.GeometryUtils.merge(grassGeometry, leaf);
-            _leaves.push(leaf);
+           scene.add(leaf);
+        _grass.push( leaf);
         }
     }
-    grassMesh = new THREE.Mesh( grassGeometry, grassMaterial );
-    scene.add(grassMesh);
+/*
 
-  */              var grassGeometry = new THREE.SphereGeometry( 1, 4, 4 );
+                var grassGeometry = new THREE.SphereGeometry( 1, 4, 4 );
                 //new THREE.PlaneGeometry( 2, 2, grassWidth - 1, grassHeight - 1 );
                 grassGeometry.dynamic = true;
 
-                var grassMap = THREE.ImageUtils.loadTexture( 'grass_billboard.png' );
-grassMap.magFilter = THREE.NearestFilter; grassMap.minFilter = THREE.NearestFilter; grassMap.generateMipmaps = false;
-
-                var grassMaterial = new THREE.MeshBasicMaterial( { map: grassMap, alphaTest: 0.8, side: THREE.DoubleSide } );
-
+ 
                 for ( var i = 0, l = grassCount; i < l; i++ ) { 
                     grassMeshes[i] = new THREE.Mesh( grassGeometry, grassMaterial );
                     grassMeshes[i].position.x = Math.random() * worldWidth - worldWidth/2;
@@ -1883,7 +1885,7 @@ grassMap.magFilter = THREE.NearestFilter; grassMap.minFilter = THREE.NearestFilt
 
                     
                 }
-
+*/
 furUniforms = {
                     
                     texture1: { type: "t", value: THREE.ImageUtils.loadTexture( "grass_billboard.png" ) },
