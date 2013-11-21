@@ -9,7 +9,9 @@ THREE.ShaderLib['mirror'] = {
                 "noiseScale":   { type: "f", value: 0.05337 },
                 "alpha":        { type: "f", value: 1.0 },
                 "time":         { type: "f", value: 0.0 },
-                
+                "fogColor":    { type: "c", value: 0xB5D8FF },
+                "fogNear":     { type: "f", value: 1 },
+                "fogFar":      { type: "f", value: 100 },
                 "textureMatrix" : { type: "m4", value: new THREE.Matrix4() }
     },
 
@@ -60,6 +62,7 @@ THREE.ShaderLib['mirror'] = {
 
         "varying vec4 mirrorCoord;",
         "varying vec2 vUV;",
+        THREE.ShaderChunk[ "fog_pars_fragment" ],
         
         "float blendOverlay(float base, float blend) {",
             "return( base < 0.5 ? ( 2.0 * base * blend ) : (1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );",
@@ -81,6 +84,7 @@ THREE.ShaderLib['mirror'] = {
             "gl_FragColor = baseColor * 0.5 + color * 0.5;",
             
 
+        THREE.ShaderChunk[ "fog_fragment" ],
         "}"
 
     ].join("\n")
@@ -160,7 +164,8 @@ THREE.FlatMirror = function ( renderer, camera, options ) {
         fragmentShader: mirrorShader.fragmentShader, 
         vertexShader: mirrorShader.vertexShader, 
         uniforms: mirrorUniforms,
-        transparent: true
+        transparent: true,
+        fog: true
     } );
 
     this.material.uniforms.mirrorSampler.value = this.texture;
