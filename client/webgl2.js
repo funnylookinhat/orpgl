@@ -1831,7 +1831,7 @@ furUniforms = {
         
 
 Sea = new THREE.FlatMirror(renderer, camera, {
-        clipBias: 0.003, 
+        clipBias: 3, 
         textureWidth: 800, textureHeight: 600, 
         color:0x333366, 
         baseTexture: THREE.ImageUtils.loadTexture("water.png"),
@@ -1843,7 +1843,7 @@ Sea = new THREE.FlatMirror(renderer, camera, {
     });
     
     var SeaMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(800, 800, 30, 30), 
+        new THREE.PlaneGeometry(200, 200, 100, 100), 
         Sea.material 
     );
     Sea.material.side = THREE.DoubleSide;
