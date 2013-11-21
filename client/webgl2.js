@@ -5,14 +5,59 @@ Physijs.scripts.ammo = 'ammo.js';
 
 var frustum, clock, initScene, render, _boxes = [], spawnBox,
     renderer, render_stats, physics_stats, scene, ground_material, ground, light, camera, customUniforms2;
-////
 var composer, dpr, effectFXAA, renderScene;
 var t = 0;
-
 var don = false;
 var movementSpeed = 0.3;
 var frame = 0;
 var lastposs = new Array();
+var yawObject, pitchObject, nh;
+var direct;
+var heights = {};
+var container;
+var ground;
+var camera, scene, renderer, objects;
+var particleLight, pointLight, birds, bird;
+var boid, boids;
+var clock = new THREE.Clock();
+var morphs = [];
+var sprite1, uniforms = null;
+var sprite2 = null;
+var sprite3 = null;
+var sprite4 = null;
+var sprite5 = null;
+var sprite6 = null;
+var myPos = { 'x': 0, 'y': 1, 'z': 0};
+var sphere = null;
+var amplitude = 1;
+var previousRender;
+var displacement;
+var camera, scene, renderer;
+var geometry, material, mesh;
+var controls, time = Date.now();
+var objects = [];
+var ray;
+var blocker = document.getElementById('blocker');
+var instructions = document.getElementById('instructions');
+var oldval = 0;
+var box;
+var time;
+var sunround = true;
+var _leaves = new Array();
+var _trees = new Array();
+var _grass = new Array();
+var skyUniforms;
+var Sea, Sun, Sunlight, lensFlare;
+var android;
+var grassMeshes = [], grassMaterial;
+var grassHeight = 5, grassWidth = 2;
+var grassCount = 25000;
+var grassGeometry2;
+var divisor = 2;
+var waterWidth = 1024, waterDepth = 1024;
+var worldWidth = 512, worldDepth = 512;
+var furUniforms;
+var rendererStats;
 
 function loadTriangleMeshToVBO(triangleMesh, mat) {
 
@@ -144,15 +189,7 @@ function loadTriangleMeshToVBO(triangleMesh, mat) {
 
     geometry.computeBoundingSphere();
 
-    //
-
-    var material = mat
-    /*new THREE.MeshPhongMaterial( {
-     color: 0xaaaaaa, ambient: 0xaaaaaa, specular: 0xffffff, shininess: 250,
-     side: THREE.FrontSide, vertexColors: THREE.VertexColors
-     } );*/
-
-    var mesh = new THREE.Mesh(geometry, material);
+    var mesh = new THREE.Mesh(geometry, mat);
 
     //
 
@@ -521,9 +558,6 @@ THREE.Euler.prototype = {
     }
 
 };
-
-var yawObject, pitchObject, nh;
-var direct;
 
 THREE.PointerLockControls = function(camera) {
 //console.log("YES");
@@ -990,7 +1024,6 @@ var uniformsS11 = {
     }
 };
 
-var heights = {};
 
 function getH(x, y) {
     x = Math.floor(x);
@@ -1002,41 +1035,6 @@ function getH(x, y) {
     }
     return 0;
 }
-var container;
-var ground;
-var camera, scene, renderer, objects;
-var particleLight, pointLight, birds, bird;
-
-var boid, boids;
-
-
-var clock = new THREE.Clock();
-var morphs = [];
-
-var sprite1, uniforms = null;
-var sprite2 = null;
-var sprite3 = null;
-var sprite4 = null;
-var sprite5 = null;
-var sprite6 = null;
-var myPos = { 'x': 0, 'y': 1, 'z': 0};
-var sphere = null;
-var amplitude = 1;
-var previousRender;
-var displacement;
-
-var camera, scene, renderer;
-var geometry, material, mesh;
-var controls, time = Date.now();
-
-var objects = [];
-
-var ray;
-
-var blocker = document.getElementById('blocker');
-var instructions = document.getElementById('instructions');
-
-
 var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 
 if(havePointerLock) {
@@ -1175,7 +1173,7 @@ function replacer(key, value) {
     }
     return value;
 }
-var oldval = 0;
+
 function checkPos(camera) {
     var willsend = false;
     myPos.rx = Math.floor(camera.rotation.x);
@@ -1250,7 +1248,6 @@ function checkPos(camera) {
 
 }
 
-var box;
 spawnBox = (function() {
     var box_geometry = new THREE.SphereGeometry(0.24, 8, 8),
         handleCollision = function(collided_with, linearVelocity, angularVelocity) {
@@ -1327,9 +1324,6 @@ spawnBox = (function() {
         setTimeout(createBox, 1000);
     };
 })();
-
-var time;
-var sunround = true;
 
 render = function() {
     requestAnimationFrame(render);
@@ -1553,39 +1547,16 @@ function setUniforms() {
     };
 }
 
-var _leaves = new Array();
-var _trees = new Array();
-var _grass = new Array();
-var skyUniforms;
-var Sea, Sun, Sunlight, lensFlare;
-var android;
-var grassMeshes = [], grassMaterial;
-var grassHeight = 5, grassWidth = 2;
-var grassCount = 25000;
-
-
-var grassGeometry2;
-
-
-var divisor = 2;
-var waterWidth = 1024, waterDepth = 1024;
-var worldWidth = 512, worldDepth = 512;
-var furUniforms;
-var rendererStats;
 initScene = function() {
     rendererStats = new THREEx.RendererStats();
 
     var FizzyText = function() {
         this.message = 'dat.gui';
-//  this.speed = 0.8;
-//  this.displayOutline = false;
     };
 
     var text = new FizzyText();
     var gui = new dat.GUI();
     gui.add(text, 'message');
-//  gui.add(text, 'speed', -5, 5);
-//  gui.add(text, 'displayOutline');
 
     gui.domElement.style.position = 'absolute';
     gui.domElement.style.top = '0px';
@@ -1597,10 +1568,7 @@ initScene = function() {
     // RENDERER
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    /*renderer.shadowMapEnabled = true;
-     renderer.shadowMapSoft = true;
-     */
-    //renderer.setClearColor(new THREE.Color(0xB4E4F4));
+
     var container = document.createElement('div');
     document.body.appendChild(container);
     container.appendChild(renderer.domElement);
@@ -1615,7 +1583,7 @@ initScene = function() {
         }
     );
 
-    // CAMERA
+    // CAMERA & FRUSTUM
     camera = new THREE.PerspectiveCamera(
         35,
         window.innerWidth / window.innerHeight,
@@ -1626,8 +1594,10 @@ initScene = function() {
     camera.lookAt(scene.position);
     scene.add(camera);
     frustum = new THREE.Frustum();
-//FOG
+    
+    //FOG
     scene.fog = new THREE.Fog(0xB5D8FF, 1, 100);
+    
     // LIGHTS
 
     var hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
@@ -1635,8 +1605,6 @@ initScene = function() {
     hemiLight.groundColor.setHSL(0.095, 1, 0.75);
     hemiLight.position.set(0, 500, 0);
     scene.add(hemiLight);
-
-    //
 
     var dirLight = new THREE.DirectionalLight(0xffffff, 1);
     dirLight.color.setHSL(0.1, 1, 0.95);
@@ -1678,28 +1646,11 @@ initScene = function() {
 
     var sky = new THREE.Mesh(skyGeo, skyMat);
     scene.add(sky);
-///LENS FLARE / SUN
-
-    /*
-     view-source:http://threejs.org/examples/webgl_lensflares.html
-     */
-//    var Sun_geometry = new THREE.SphereGeometry( 5, 8, 8 );
-    /*    var Sun_material = Physijs.createMaterial(
-     new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'texture.jpg' ) , transparent:true}),
-     .8, // high friction
-     .3 // low restitution
-     );
-
-     Sun_material.opacity = 0.6;
-     Sun = new THREE.Mesh(Sun_geometry,Sun_material);
-     */
+    ///LENS FLARE / SUN
+    
     var textureFlare0 = THREE.ImageUtils.loadTexture("lensflare0.png");
-    // var textureFlare2 = THREE.ImageUtils.loadTexture( "lensflare1.png" );
-    // var textureFlare3 = THREE.ImageUtils.loadTexture( "lensflare2.png" );
     addLight(0.55, 0.9, 0.5, 0, 290, 0);
-    //  Sun.position.set( 195,50,0 );
-    //  scene.add( Sun );
-
+    
     function addLight(h, s, l, x, y, z) {
 
         Sunlight = new THREE.PointLight(0xffffff, 1.5, 4500);
@@ -1711,16 +1662,6 @@ initScene = function() {
         flareColor.setHSL(h, s, l + 0.5);
 
         lensFlare = new THREE.LensFlare(textureFlare0, 700, 0.0, THREE.AdditiveBlending, flareColor);
-        /*
-         lensFlare.add( textureFlare2, 512, 0.0, THREE.AdditiveBlending );
-         lensFlare.add( textureFlare2, 512, 0.0, THREE.AdditiveBlending );
-         lensFlare.add( textureFlare2, 512, 0.0, THREE.AdditiveBlending );
-
-         lensFlare.add( textureFlare3, 60, 0.6, THREE.AdditiveBlending );
-         lensFlare.add( textureFlare3, 70, 0.7, THREE.AdditiveBlending );
-         lensFlare.add( textureFlare3, 120, 0.9, THREE.AdditiveBlending );
-         lensFlare.add( textureFlare3, 70, 1.0, THREE.AdditiveBlending );
-         */
         lensFlare.customUpdateCallback = lensFlareUpdateCallback;
         lensFlare.position = Sunlight.position;
 
@@ -1746,10 +1687,6 @@ initScene = function() {
             flare.rotation = 0;
 
         }
-
-        // object.lensFlares[ 2 ].y += 0.025;
-        // object.lensFlares[ 3 ].rotation = object.positionScreen.x * 0.5 + THREE.Math.degToRad( 45 );
-
     }
 
     // MISC
@@ -1791,9 +1728,7 @@ initScene = function() {
         ground_material,
         0, worldWidth - 1, worldDepth - 1
     );
-    /*ground.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
-     ground.receiveShadow = true;
-     */
+
     var terrain_ground = loadTriangleMeshToVBO(ground, ground_material);
 
     terrain_ground.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
