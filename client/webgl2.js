@@ -1022,60 +1022,7 @@ direct = direct.multiplyScalar( 5 );
             alert('Your browser doesn\'t seem to support Pointer Lock API');
         }
 
-var grassMesh, grassGeometry, grassMaterial;
 
-            function generateRandomGrassLeaf( material ) {
-                var geometry = new THREE.Geometry(),
-                    dir = (Math.random() > 0.5) ? 1.0 : -1.0,
-                    offset = Math.random() * 0.5 + 0.2,
-                    factor = Math.random() * 2 + 1;
-                geometry.vertices.push( new THREE.Vector3(   0, 0, dir * factor * Math.pow( offset, 5 ) ) );
-                geometry.vertices.push( new THREE.Vector3(   1, 0, dir * factor * Math.pow( offset, 5 ) ) );
-                geometry.vertices.push( new THREE.Vector3( 0.1, 1, dir * factor * Math.pow( offset, 4 ) ) );
-                geometry.vertices.push( new THREE.Vector3( 0.8, 2, dir * factor * Math.pow( offset, 3 ) ) );
-                geometry.vertices.push( new THREE.Vector3( 0.3, 3, dir * factor * Math.pow( offset, 2 ) ) );
-                geometry.vertices.push( new THREE.Vector3( 0.5, 4, dir * factor * Math.pow( offset, 1 ) ) );
-                geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
-                geometry.faces.push( new THREE.Face3( 1, 3, 2 ) );
-                geometry.faces.push( new THREE.Face3( 2, 3, 4 ) );
-                geometry.faces.push( new THREE.Face3( 3, 5, 4 ) );
-                function generateGrassColor() {
-                    return new THREE.Color().setRGB( Math.random() * 0.1 + 0.1, Math.random() * 0.5 + offset - 0.3, Math.random() * 0.2 + 0.1 );
-                }
-                geometry.faces[0].vertexColors[0] = generateGrassColor();
-                geometry.faces[0].vertexColors[1] = generateGrassColor();
-                geometry.faces[0].vertexColors[2] = generateGrassColor();
-                geometry.faces[1].vertexColors[0] = geometry.faces[0].vertexColors[1];
-                geometry.faces[1].vertexColors[1] = generateGrassColor();
-                geometry.faces[1].vertexColors[2] = geometry.faces[0].vertexColors[2];
-                geometry.faces[2].vertexColors[0] = geometry.faces[1].vertexColors[2];
-                geometry.faces[2].vertexColors[1] = geometry.faces[1].vertexColors[1];
-                geometry.faces[2].vertexColors[2] = generateGrassColor();
-                geometry.faces[3].vertexColors[0] = geometry.faces[2].vertexColors[1]
-                geometry.faces[3].vertexColors[1] = generateGrassColor();
-                geometry.faces[3].vertexColors[2] = geometry.faces[2].vertexColors[2];
-                
-                var mesh = new THREE.Mesh( geometry, material );
-                mesh.scale.set(0.1, Math.random() * 0.2 + 0.2, 0.1);
-                mesh.position.x = Math.random() * 512-256;
-                mesh.position.z = Math.random() * 512-256;
-                var i=0;
-                var h = 0;
-                h = getH(mesh.position.x/divisor ,-mesh.position.z/divisor)-0.5;
-                if (h<3&&h>-5) {
-                
-                   mesh.scale.set(0.1, Math.random() * 0.2 + 0.1, 0.1);                
-                }
-                else if (h>3) {
-                }
-                else {
-                    mesh =null;
-                    return null
-                }
-                mesh.position.y = h;
-                mesh.rotation.y = Math.random();
-                return mesh;
-            }
  function loadtrees(loader,branchfactor,levels,leafsprite,iduni,idxstart,idxend,amplitude,previousRender,attributes,displacement,seed,segments,vMultiplier,twigScale,initalBranchLength,lengthFalloffFactor,lengthFalloffPower,clumpMax,clumpMin){
     
     var url = 'http://localhost:8080/tree?leaves=0&levels='+levels+'&branchfactor='+branchfactor
@@ -1164,42 +1111,11 @@ function onWindowResize( event ) {
 }
 
 function animate() {
-    //requestAnimationFrame( animate );
-/*
-    if ( t > 30 ) t = 0;
-
-    var delta = clock.getDelta();
-for ( var i = 0, il = grassGeometry.vertices.length / 2 - 1; i <= il; i ++ ) {
-                for ( var j = 0, jl = 2, f = (il - i) / il; j < jl; j++ ) {
-                    //grassGeometry.vertices[ jl * i + j ].z = f * Math.sin(time) / 200
-                }
-            }
-
-            grassGeometry.verticesNeedUpdate = true;
-    if (don==false && morphs.length>0) dod();
-    
-*/
-//    controls.update( Date.now() - time );
-    //time = Date.now() - time ;
-
  
-//Sunlight.position.x=Math.floor(Math.cos( clock.getDelta() ) * 200);
-//lensFlare.position.x=Math.floor(Math.cos( clock.getDelta() ) * 200);
-//Sun.position.x = Math.floor(Math.cos( clock.elapsedTime ) * 200);
-//  Sun.position.y = Math.floor(Math.sin( clock.getDelta() ) * 200);
-
     Sea.render();
 
     render();
 }
-function dod(){
-
-
-        don=true;
-}
-
-
-
 
 function replacer(key, value) {
     if (typeof value === 'number' && !isFinite(value)) {
@@ -1369,6 +1285,19 @@ render = function() {
 
     var delta = clock.getDelta();
 
+
+                    var time = clock.getElapsedTime();
+
+for ( var i = 0, il = grassGeometry2.vertices.length / 2 - 1; i <= il; i ++ ) {
+                    for ( var j = 0, jl = grassWidth, f = (il - i) / il; j < jl; j++ ) {
+                        grassGeometry2.vertices[ jl * i + j ].z = f * Math.sin(time) / 2
+                    }
+                }
+
+                grassGeometry2.verticesNeedUpdate = true;
+                
+
+
     Sea.material.uniforms.time.value += delta;
 
     furUniforms.time.value += delta*100;
@@ -1403,7 +1332,7 @@ var count=0;
 for (var i=0; i<final_objs.length; i++) {
     var point2 = final_objs[i].position;
     var distance = point1.distanceTo( point2 );
-    if (distance <10)
+    if (distance <150)
     final_objs[i].visible = true;
     else
     final_objs[i].visible = false;
@@ -1569,9 +1498,13 @@ var _grass  = new Array();
 var skyUniforms;
 var Sea,Sun,Sunlight,lensFlare ;
 var android;
-var  grassMeshes = [], grassGeometry, grassMaterial;
+var  grassMeshes = [], grassMaterial;
 var grassHeight = 5, grassWidth = 2;
-var grassCount = 5000;
+var grassCount = 25000;
+
+
+var grassGeometry2;
+
 
     var divisor = 2;
         var waterWidth = 1024, waterDepth = 1024;
@@ -1838,11 +1771,8 @@ var mesh = new THREE.Mesh( smooth, new THREE.MeshPhongMaterial( { color: 0x22222
 scene.add( mesh );
     
     ground.receiveShadow = true;
-               var grassMap = THREE.ImageUtils.loadTexture( 'grass_billboard.png' );
-grassMap.magFilter = THREE.NearestFilter; grassMap.minFilter = THREE.NearestFilter; grassMap.generateMipmaps = false;
 
-                var grassMaterial = new THREE.MeshBasicMaterial( { map: grassMap, alphaTest: 0.8, side: THREE.DoubleSide } );
-
+    // POPULATE HEIGHTS ARRAY
     for ( var i = 0, l = ground.geometry.vertices.length; i < l; i ++ ) {
         if (heights[Math.floor(ground.geometry.vertices[ i ].x/divisor)] == undefined)
         heights[""+Math.floor(ground.geometry.vertices[ i ].x/divisor)] = {};
@@ -1850,42 +1780,7 @@ grassMap.magFilter = THREE.NearestFilter; grassMap.minFilter = THREE.NearestFilt
   
     }
 
-    //GRASS
-    grassMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, side: THREE.DoubleSide } );
-    grassGeometry = new THREE.Geometry();
-    for ( var i = 0, l = grassCount; i < l; i++ ) {
-        var leaf = generateRandomGrassLeaf( grassMaterial );
-        if (leaf) {
-           scene.add(leaf);
-        _grass.push( leaf);
-        }
-    }
-/*
-
-                var grassGeometry = new THREE.SphereGeometry( 1, 4, 4 );
-                //new THREE.PlaneGeometry( 2, 2, grassWidth - 1, grassHeight - 1 );
-                grassGeometry.dynamic = true;
-
- 
-                for ( var i = 0, l = grassCount; i < l; i++ ) { 
-                    grassMeshes[i] = new THREE.Mesh( grassGeometry, grassMaterial );
-                    grassMeshes[i].position.x = Math.random() * worldWidth - worldWidth/2;
-                    grassMeshes[i].position.z = Math.random() * worldDepth - worldDepth/2;
-                    var h = getH(grassMeshes[i].position.x/divisor ,-grassMeshes[i].position.z/divisor)+0.4;
-                    grassMeshes[i].scale.set(.5,.5,.5);
-                    if (h<-5) {
-                        grassMeshes[i] =null;
-                        continue;
-                    }
-                    grassMeshes[i].position.y = h;
-
-                    grassMeshes[i].rotation.y = Math.random() * Math.PI;
-                    scene.add( grassMeshes[i] );
-                    _grass.push( grassMeshes[i] );
-
-                    
-                }
-*/
+    // WINNING AREA
 furUniforms = {
                     
                     texture1: { type: "t", value: THREE.ImageUtils.loadTexture( "grass_billboard.png" ) },
@@ -1957,6 +1852,35 @@ Sea = new THREE.FlatMirror(renderer, camera, {
     SeaMesh.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
     SeaMesh.position.set(0,-5,0);
     scene.add(SeaMesh);  
+
+
+ grassGeometry2 = new THREE.PlaneGeometry( 2, 2, grassWidth - 1, grassHeight - 1 );
+                grassGeometry2.dynamic = true;
+                grassGeometry2.vertices[ 3 ].z = 1;
+var grassMap = THREE.ImageUtils.loadTexture( 'grass_billboard.png' );
+
+                var grassMaterial = new THREE.MeshBasicMaterial( { map: grassMap, alphaTest: 0.8, side: THREE.DoubleSide } );
+
+              
+
+for ( var i = 0, l = grassCount; i < l; i++ ) {
+                    grassMeshes[i] = new THREE.Mesh( grassGeometry2, grassMaterial );
+
+                    grassMeshes[i].position.x = Math.random() * worldWidth - worldWidth/2;
+                    grassMeshes[i].position.z = Math.random() * worldDepth - worldDepth/2;
+                    var h = getH(grassMeshes[i].position.x/divisor ,-grassMeshes[i].position.z/divisor)+0.5;
+                    if (h<-5) {
+                        grassMeshes[i] =null;
+                        continue;
+                    }
+                    grassMeshes[i].position.y = h;
+
+                    grassMeshes[i].rotation.y = Math.random() * Math.PI;
+                    scene.add( grassMeshes[i] );    
+                    _grass.push( grassMeshes[i] );
+                }
+
+
 
     renderer.setClearColor( scene.fog.color, 1 );
 
