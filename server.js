@@ -300,8 +300,9 @@ loaddir(jslibs);
 console.log("loading folder "+appfolder);
 loaddir(appfolder);
 
-console.log("loading trees folder");
+console.log("loading trees folders");
 loaddir('violet');
+loaddir('palm');
 
 createnature();
 

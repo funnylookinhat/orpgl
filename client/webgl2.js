@@ -1148,15 +1148,36 @@ function loadNature() {
     var loader = new THREE.JSONLoader();
 
 
+    // model
+    var loader = new THREE.OBJLoader( );
+    var obj= null;
+    loader.load( 'palm/lowpolytree5.obj', function ( object ) {
 
-    var texture = new THREE.Texture();
+         for(var i = 0; i < 100; i++) {
 
-    var loader = new THREE.ImageLoader( );
-    loader.load( 'violet/violet.png', function ( image ) {
+            var objt = object.clone();
+            objt.traverse( function ( child ) {
+                if ( child instanceof THREE.Mesh ) {
+                    child.material=new THREE.MeshBasicMaterial({ map: THREE.ImageUtils.loadTexture('palm/shu1.png'), transparent: true, alphaTest: 0.5,side: THREE.DoubleSide});
+                }
+            } );
+       
+            var x = naturePos[0][i] * 1;
+            var z = naturePos[1][i] * 1;
+            if(!(getH(x / divisor, -z / divisor) < 0)) {
+               
+            objt.position.set(x, getH(x / divisor, -z / divisor) , z);
+            objt.rotation.y = THREE.Math.randFloat(-0.25, 0.25);
+            var xz = THREE.Math.randFloat(3, 4)
+            objt.scale.set(xz,3,xz);
+            console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
+            scene.add(objt);
 
-            texture.image = image;
-            texture.needsUpdate = true;
+            }
+            //       _trees.push(object);
+            //  var android = object;
 
+        }
     } );
 
     // model
@@ -1164,32 +1185,29 @@ function loadNature() {
     var obj= null;
     loader.load( 'violet/violet_tree-obj.obj', function ( object ) {
 
- for(var i = 0; i < 100; i++) {
+         for(var i = 101; i < 200; i++) {
 
-var objt = object.clone();
-        objt.traverse( function ( child ) {
-            if ( child instanceof THREE.Mesh ) {
+            var objt = object.clone();
+            objt.traverse( function ( child ) {
+                if ( child instanceof THREE.Mesh ) {
                     child.material=new THREE.MeshBasicMaterial({ map: THREE.ImageUtils.loadTexture('violet/violet.png'), transparent: true, alphaTest: 0.5,side: THREE.DoubleSide});
-
-            }
-
-        } );
-        
-
+                }
+            } );
        
             var x = naturePos[0][i] * 1;
             var z = naturePos[1][i] * 1;
-            /*if(getH(x / divisor, -z / divisor) < -5) {
-                continue;
-            }*/
+            if(!(getH(x / divisor, -z / divisor) < 0)) {
+               
             objt.position.set(x, getH(x / divisor, -z / divisor) +4, z);
             objt.rotation.y = THREE.Math.randFloat(-0.25, 0.25);
             var xz = THREE.Math.randFloat(0.1, 0.4)
             objt.scale.set(xz,0.1,xz);
-console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
+            console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
             scene.add(objt);
-     //       _trees.push(object);
-          //  var android = object;
+
+            }
+            //       _trees.push(object);
+            //  var android = object;
 
         }
     } );
@@ -1867,7 +1885,7 @@ initScene = function() {
     SeaMesh.add(Sea);
 
     SeaMesh.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
-    SeaMesh.position.set(0, -5, 0);
+    SeaMesh.position.set(0, 0, 0);
     scene.add(SeaMesh);
 
 
