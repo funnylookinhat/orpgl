@@ -45,7 +45,7 @@ var Sea, Sun, Sunlight, lensFlare;
 var android;
 var grassMeshes = [], grassMaterial;
 var grassHeight = 5, grassWidth = 2;
-var grassCount = 2000;
+var grassCount = 6000;
 var grassGeometry2;
 var divisor = 2;
 var waterWidth = 1024, waterDepth = 1024;
