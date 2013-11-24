@@ -293,11 +293,15 @@ function loaddir(path, callback) {
   });
 }
 
-var jslibs = 'js'
-console.log("loading folder "+appfolder);
-loaddir(appfolder);
+var jslibs = 'js';
 console.log("loading folder "+jslibs);
 loaddir(jslibs);
+
+console.log("loading folder "+appfolder);
+loaddir(appfolder);
+
+console.log("loading trees folder");
+loaddir('violet');
 
 createnature();
 

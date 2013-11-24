@@ -7,9 +7,6 @@ var frustum, clock, initScene, render, _boxes = [], spawnBox,
     renderer, render_stats, physics_stats, scene, ground_material, ground, light, camera, customUniforms2;
 var composer, dpr, effectFXAA, renderScene;
 var t = 0;
-var don = false;
-var movementSpeed = 0.3;
-var frame = 0;
 var lastposs = new Array();
 var yawObject, pitchObject, nh;
 var direct;
@@ -18,7 +15,6 @@ var container;
 var ground;
 var camera, scene, renderer, objects;
 var particleLight, pointLight, birds, bird;
-var boid, boids;
 var clock = new THREE.Clock();
 var morphs = [];
 var sprite1, uniforms = null;
@@ -36,10 +32,8 @@ var camera, scene, renderer;
 var geometry, material, mesh;
 var controls, time = Date.now();
 var objects = [];
-var ray;
 var blocker = document.getElementById('blocker');
 var instructions = document.getElementById('instructions');
-var oldval = 0;
 var box;
 var time;
 var sunround = true;
@@ -51,7 +45,7 @@ var Sea, Sun, Sunlight, lensFlare;
 var android;
 var grassMeshes = [], grassMaterial;
 var grassHeight = 5, grassWidth = 2;
-var grassCount = 25000;
+var grassCount = 100;
 var grassGeometry2;
 var divisor = 2;
 var waterWidth = 1024, waterDepth = 1024;
@@ -59,9 +53,9 @@ var worldWidth = 512, worldDepth = 512;
 var furUniforms;
 var rendererStats;
 
-function loadTriangleMeshToVBO(triangleMesh, mat) {
+function loadGeometryToVBO(inGeometry, mat) {
 
-    var triangles = triangleMesh.geometry.faces.length;
+    var triangles = inGeometry.faces.length;
 
     var geometry = new THREE.BufferGeometry();
     geometry.attributes = {
@@ -101,8 +95,8 @@ function loadTriangleMeshToVBO(triangleMesh, mat) {
 
     var color = new THREE.Color();
 
-    var faces = triangleMesh.geometry.faces;
-    var verts = triangleMesh.geometry.vertices;
+    var faces = inGeometry.faces;
+    var verts = inGeometry.vertices;
 
     for(var i = 0; i < triangles; i++) {
 
@@ -124,7 +118,7 @@ function loadTriangleMeshToVBO(triangleMesh, mat) {
 
         //
 
-        var vn = triangleMesh.geometry.faces[ i ].vertexNormals
+        var vn = inGeometry.faces[ i ].vertexNormals
 
         normals[ i * 9 ] = vn[ 0 ].x;
         normals[ i * 9 + 1 ] = vn[ 0 ].y;
@@ -139,7 +133,7 @@ function loadTriangleMeshToVBO(triangleMesh, mat) {
         normals[ i * 9 + 8 ] = vn[ 2 ].z;
 
         //
-
+/*
         var ca = verts[ai].y + verts[bi].y + verts[ci].y / 3
         var cb = 2.0 / ca;
 
@@ -167,6 +161,7 @@ function loadTriangleMeshToVBO(triangleMesh, mat) {
         colors[ i * 9 + 7 ] = color.g;
         colors[ i * 9 + 8 ] = color.b;
 
+*/
     }
 
     //
@@ -187,11 +182,13 @@ function loadTriangleMeshToVBO(triangleMesh, mat) {
 
     }
 
-    geometry.computeBoundingSphere();
+    geometry.computeBoundingSphere();   
+
 
     var mesh = new THREE.Mesh(geometry, mat);
 
-    //
+//    mesh.computeFaceNormals();
+//    mesh.computeVertexNormals();
 
     return mesh;
 
@@ -726,8 +723,8 @@ THREE.PointerLockControls = function(camera) {
 
         delta = 2;
 
-        velocity.x += ( -velocity.x ) * 0.08 * delta;
-        velocity.z += ( -velocity.z ) * 0.08 * delta;
+        velocity.x += ( -velocity.x ) * 0.008 * delta;
+        velocity.z += ( -velocity.z ) * 0.008 * delta;
 
         //velocity.y -= 0.025 * delta;
 
@@ -1149,9 +1146,56 @@ function loadtrees(loader, branchfactor, levels, leafsprite, iduni, idxstart, id
 
 function loadNature() {
     var loader = new THREE.JSONLoader();
-    loadtrees(loader, 10, 5, sprite1, 1, 0, 199, "amplitude", "previousRender", attributesS6, "displacement", 10, 10, 10, 1);
-    loadtrees(loader, 3.4, 5, sprite2, 1, 200, 399, "amplitude", "previousRender", attributesS6, "displacement", 10, 10, 3, 1);
-    loadtrees(loader, 20, 15, sprite3, 1, 400, 500, "amplitude", "previousRender", attributesS6, "displacement", 30, 3, 5, 1);
+
+
+
+    var texture = new THREE.Texture();
+
+    var loader = new THREE.ImageLoader( );
+    loader.load( 'violet/violet.png', function ( image ) {
+
+            texture.image = image;
+            texture.needsUpdate = true;
+
+    } );
+
+    // model
+    var loader = new THREE.OBJLoader( );
+    var obj= null;
+    loader.load( 'violet/violet_tree-obj.obj', function ( object ) {
+
+ for(var i = 0; i < 100; i++) {
+
+var objt = object.clone();
+        objt.traverse( function ( child ) {
+            if ( child instanceof THREE.Mesh ) {
+                    child.material=new THREE.MeshBasicMaterial({ map: THREE.ImageUtils.loadTexture('violet/violet.png'), transparent: true, alphaTest: 0.5,side: THREE.DoubleSide});
+
+            }
+
+        } );
+        
+
+       
+            var x = naturePos[0][i] * 1;
+            var z = naturePos[1][i] * 1;
+            /*if(getH(x / divisor, -z / divisor) < -5) {
+                continue;
+            }*/
+            objt.position.set(x, getH(x / divisor, -z / divisor) +4, z);
+            objt.rotation.y = THREE.Math.randFloat(-0.25, 0.25);
+            var xz = THREE.Math.randFloat(0.1, 0.4)
+            objt.scale.set(xz,0.1,xz);
+console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
+            scene.add(objt);
+     //       _trees.push(object);
+          //  var android = object;
+
+        }
+    } );
+//    loadtrees(loader, 10, 5, sprite1, 1, 0, 19, "amplitude", "previousRender", attributesS6, "displacement", 10, 10, 10, 1);
+//    loadtrees(loader, 3.4, 5, sprite2, 1, 20, 39, "amplitude", "previousRender", attributesS6, "displacement", 10, 10, 3, 1);
+//    loadtrees(loader, 20, 15, sprite3, 1, 40, 50, "amplitude", "previousRender", attributesS6, "displacement", 30, 3, 5, 1);
 }
 
 function onWindowResize(event) {
@@ -1705,36 +1749,40 @@ initScene = function() {
     var data = groundGeometry;
 
     // GROUND
-    ground_material = Physijs.createMaterial(
+    ground_material = new THREE.MeshPhongMaterial( { color: 0xffffff, map: THREE.ImageUtils.loadTexture('texture.jpg') });
+/*
+    Physijs.createMaterial(
         new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture('texture.jpg') }),
         .8, // high friction
         .3 // low restitution
     );
     ground_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
-    ground_material.map.repeat.set(1, 1);
+    ground_material.map.repeat.set(0.1, 0.1);
     ground_material.color.setHSL(0.095, 1, 0.75);
-
+*/
     var NoiseGen = new SimplexNoise;
 
     var ground_geometry = new THREE.PlaneGeometry(worldWidth, worldDepth, worldWidth / divisor - 1, worldDepth / divisor - 1);
     for(var i = 0, l = ground_geometry.vertices.length; i < l; i++) {
         ground_geometry.vertices[ i ].z = data[ i ] / 3 - 10;//NoiseGen.noise( ground_geometry.vertices[ i ].x / 20, ground_geometry.vertices[ i ].y / 20 ) * 10;
     }
-    ground_geometry.computeFaceNormals();
-    ground_geometry.computeVertexNormals();
 
     ground = new Physijs.HeightfieldMesh(
         ground_geometry,
         ground_material,
         0, worldWidth - 1, worldDepth - 1
     );
+    ground.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+    ground_geometry.computeFaceNormals();
+    ground_geometry.computeVertexNormals();
+    ground.receiveShadow = true;
 
-    var terrain_ground = loadTriangleMeshToVBO(ground, ground_material);
+    //BUFFER OBJECT TEST :^)
+    //var terrain_ground = loadGeometryToVBO(ground_geometry, ground_material);
+    //terrain_ground.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+    //terrain_ground.receiveShadow = true;
 
-    terrain_ground.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
-    terrain_ground.receiveShadow = true;
-
-    scene.add(terrain_ground);
+    scene.add(ground);
 
     var cube_geometry = new THREE.CubeGeometry(3, 3, 3);
     var cube_mesh = new THREE.Mesh(cube_geometry);
@@ -1750,14 +1798,15 @@ initScene = function() {
     var mesh = new THREE.Mesh(smooth, new THREE.MeshPhongMaterial({ color: 0x222222 }));
     scene.add(mesh);
 
-    ground.receiveShadow = true;
+//    ground.receiveShadow = true;
 
-    // POPULATE HEIGHTS ARRAY
-    for(var i = 0, l = ground.geometry.vertices.length; i < l; i++) {
-        if(heights[Math.floor(ground.geometry.vertices[ i ].x / divisor)] == undefined) {
-            heights["" + Math.floor(ground.geometry.vertices[ i ].x / divisor)] = {};
+    // POPULATE HEIGHTS ARRAY :)
+    var TGV = ground.geometry.vertices;
+    for(var i = 0, l = TGV.length; i < l; i++) {
+        if(heights[Math.floor(TGV[ i ].x / divisor)] == undefined) {
+            heights["" + Math.floor(TGV[ i ].x / divisor)] = {};
         }
-        heights["" + Math.floor(ground.geometry.vertices[ i ].x / divisor)]["" + Math.floor(ground.geometry.vertices[ i ].y / divisor)] = ground.geometry.vertices[ i ].z;
+        heights["" + Math.floor(TGV[ i ].x / divisor)]["" + Math.floor(TGV[ i ].y / divisor)] = TGV[ i ].z;
 
     }
 
@@ -1794,18 +1843,6 @@ initScene = function() {
     //NATURE
     loadNature();
 
-    var jsonLoader = new THREE.JSONLoader();
-    jsonLoader.load("android.js", addModelToScene);
-
-
-    function addModelToScene(geometry, materials) {
-
-        android = new THREE.Mesh(geometry, grassMaterial);
-        android.scale.set(.1, .1, .1);
-        android.position.y = getH(0, 0);
-        scene.add(android);
-    }
-
     var noiseTexture = new THREE.ImageUtils.loadTexture('cloud.png');
     noiseTexture.wrapS = noiseTexture.wrapT = THREE.RepeatWrapping;
 
@@ -1823,7 +1860,7 @@ initScene = function() {
     });
 
     var SeaMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(200, 200, 100, 100),
+        new THREE.PlaneGeometry(800, 800, 100, 100),
         Sea.material
     );
     Sea.material.side = THREE.DoubleSide;
