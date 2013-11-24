@@ -45,7 +45,7 @@ var Sea, Sun, Sunlight, lensFlare;
 var android;
 var grassMeshes = [], grassMaterial;
 var grassHeight = 5, grassWidth = 2;
-var grassCount = 100;
+var grassCount = 2000;
 var grassGeometry2;
 var divisor = 2;
 var waterWidth = 1024, waterDepth = 1024;
@@ -1162,8 +1162,8 @@ function loadNature() {
                 }
             } );
        
-            var x = naturePos[0][i] * 1;
-            var z = naturePos[1][i] * 1;
+            var x = naturePos[0][i] * 4;
+            var z = naturePos[1][i] * 4;
             if(!(getH(x / divisor, -z / divisor) < 0)) {
                
             objt.position.set(x, getH(x / divisor, -z / divisor) , z);
@@ -1180,6 +1180,39 @@ function loadNature() {
         }
     } );
 
+
+    // model
+    var loader = new THREE.OBJLoader( );
+    var obj= null;
+    loader.load( 'tree1/tree4-obj.obj', function ( object ) {
+
+         for(var i = 101; i < 200; i++) {
+
+            var objt = object.clone();
+            objt.traverse( function ( child ) {
+                if ( child instanceof THREE.Mesh ) {
+                    child.material=new THREE.MeshBasicMaterial({ map: THREE.ImageUtils.loadTexture('tree1/texture.png'), transparent: true, alphaTest: 0.5,side: THREE.DoubleSide});
+                }
+            } );
+       
+            var x = naturePos[0][i] * 4;
+            var z = naturePos[1][i] * 4;
+            if(!(getH(x / divisor, -z / divisor) < 0)) {
+               
+            objt.position.set(x, getH(x / divisor, -z / divisor) -5, z);
+            objt.rotation.y = THREE.Math.randFloat(-0.25, 0.25);
+            var xz = THREE.Math.randFloat(1, 1.5)
+            objt.scale.set(xz,2,xz);
+            console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
+            scene.add(objt);
+
+            }
+            //       _trees.push(object);
+            //  var android = object;
+
+        }
+    } );
+/*
     // model
     var loader = new THREE.OBJLoader( );
     var obj= null;
@@ -1210,7 +1243,7 @@ function loadNature() {
             //  var android = object;
 
         }
-    } );
+    } );*/
 //    loadtrees(loader, 10, 5, sprite1, 1, 0, 19, "amplitude", "previousRender", attributesS6, "displacement", 10, 10, 10, 1);
 //    loadtrees(loader, 3.4, 5, sprite2, 1, 20, 39, "amplitude", "previousRender", attributesS6, "displacement", 10, 10, 3, 1);
 //    loadtrees(loader, 20, 15, sprite3, 1, 40, 50, "amplitude", "previousRender", attributesS6, "displacement", 30, 3, 5, 1);
@@ -1658,7 +1691,7 @@ initScene = function() {
     frustum = new THREE.Frustum();
     
     //FOG
-    scene.fog = new THREE.Fog(0xB5D8FF, 1, 100);
+    scene.fog = new THREE.Fog(0xB5D8FF, 1, 500);
     
     // LIGHTS
 

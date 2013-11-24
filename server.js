@@ -303,6 +303,7 @@ loaddir(appfolder);
 console.log("loading trees folders");
 loaddir('violet');
 loaddir('palm');
+loaddir('tree1');
 
 createnature();
 
