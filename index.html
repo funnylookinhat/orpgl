@@ -68,6 +68,7 @@ uniform sampler2D snowyTexture;
 uniform sampler2D heightMap;
 
 varying vec2 vUV;
+//THREE.ShaderChunk[ "fog_pars_fragment" ]
 
 varying float vAmount;
 
@@ -80,6 +81,8 @@ void main()
 	vec4 snowy = (smoothstep(0.50, 0.65, vAmount))                                   * texture2D( snowyTexture, vUV * 10.0 );
 	vec4 tx = texture2D( heightMap, vUV);  
 	gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0) + water + sandy + grass + rocky + snowy; //, 1.0);
+
+//        THREE.ShaderChunk[ "fog_pars_fragment" ]
 }  
 </script>
 

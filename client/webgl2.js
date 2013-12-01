@@ -1304,7 +1304,7 @@ function checkPos(camera) {
     myPos.rx = Math.floor(camera.rotation.x);
     myPos.ry = Math.floor(camera.rotation.y);
     myPos.rz = Math.floor(camera.rotation.z);
-
+/*
     var posdiv = document.getElementById("posDiv");
     posdiv.style.right = xp + 'px';
     posdiv.style.top = yp + 'px';
@@ -1331,7 +1331,7 @@ function checkPos(camera) {
 
     var transformProperty = Modernizr.prefixed('transform');
     posdiv.style[transformProperty] = 'rotate(' + (-myPos.ry * 57) + 'deg)';
-
+*/
     if((Math.floor(camera.position.x) < myPos.x) || (Math.floor(camera.position.x) > myPos.x)) {
         myPos.x = Math.floor(camera.position.x);
         willsend = true;
@@ -1352,7 +1352,7 @@ function checkPos(camera) {
         posdiv.style.right = xp + 'px';
         posdiv.style.top = yp + 'px';
     }
-
+/*
     var xf = (52) - wa[0] / worldWidth * 128;
     var yf = -(-wa[1] / worldDepth * 128 - (56));
     document.getElementById("winPosDiv").style.right = xf + 'px';
@@ -1369,7 +1369,7 @@ function checkPos(camera) {
         // console.log('->');
         // console.log(myPos);
     }
-
+*/
 
 }
 
@@ -1470,7 +1470,7 @@ render = function() {
 
     Sea.material.uniforms.time.value += delta;
 
-    furUniforms.time.value += delta * 100;
+//    furUniforms.time.value += delta * 100;
     controls.update(Date.now() - time);
     frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
     var objs = new Array();
@@ -1833,7 +1833,7 @@ initScene = function() {
     var data = groundGeometry;
 
     // GROUND
-    ground_material = new THREE.MeshPhongMaterial( { color: 0xffffff, map: THREE.ImageUtils.loadTexture('texture.jpg') });
+//    ground_material = new THREE.MeshPhongMaterial( { color: 0xffffff, map: THREE.ImageUtils.loadTexture('texture.jpg') });
 /*
     Physijs.createMaterial(
         new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture('texture.jpg') }),
@@ -1844,7 +1844,7 @@ initScene = function() {
     ground_material.map.repeat.set(0.1, 0.1);
     ground_material.color.setHSL(0.095, 1, 0.75);
 */
-    var NoiseGen = new SimplexNoise;
+ /*   var NoiseGen = new SimplexNoise;
 
     var ground_geometry = new THREE.PlaneGeometry(worldWidth, worldDepth, worldWidth / divisor - 1, worldDepth / divisor - 1);
     for(var i = 0, l = ground_geometry.vertices.length; i < l; i++) {
@@ -1860,14 +1860,14 @@ initScene = function() {
     ground_geometry.computeFaceNormals();
     ground_geometry.computeVertexNormals();
     ground.receiveShadow = true;
-
+*/
     //BUFFER OBJECT TEST :^)
     //var terrain_ground = loadGeometryToVBO(ground_geometry, ground_material);
     //terrain_ground.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
     //terrain_ground.receiveShadow = true;
 
     //scene.add(ground);
-
+/*
     var cube_geometry = new THREE.CubeGeometry(3, 3, 3);
     var cube_mesh = new THREE.Mesh(cube_geometry);
     cube_mesh.position.y = 3;
@@ -1881,11 +1881,11 @@ initScene = function() {
     modifier.modify(smooth);
     var mesh = new THREE.Mesh(smooth, new THREE.MeshPhongMaterial({ color: 0x222222 }));
     scene.add(mesh);
-
+*/
 //    ground.receiveShadow = true;
 
     // POPULATE HEIGHTS ARRAY :)
-    var TGV = ground.geometry.vertices;
+ /*   var TGV = ground.geometry.vertices;
     for(var i = 0, l = TGV.length; i < l; i++) {
         if(heights[Math.floor(TGV[ i ].x / divisor)] == undefined) {
             heights["" + Math.floor(TGV[ i ].x / divisor)] = {};
@@ -1893,9 +1893,9 @@ initScene = function() {
         heights["" + Math.floor(TGV[ i ].x / divisor)]["" + Math.floor(TGV[ i ].y / divisor)] = TGV[ i ].z;
 
     }
-
+*/
     // WINNING AREA
-    furUniforms = {
+ /*   furUniforms = {
 
         texture1  : { type: "t", value: THREE.ImageUtils.loadTexture("grass_billboard.png") },
         time      : { type: "f", value: 1.0 },
@@ -1925,7 +1925,7 @@ initScene = function() {
        var hh = getHeight(furMesh,false)-10;
     furMesh.position.y = hh;// getH(furMesh.position.x / divisor, furMesh.position.z / divisor) + 5;
     if (hh>0)scene.add(furMesh);
-
+*/
     //NATURE
     setTimeout("loadNature();",3000);
 
@@ -2010,15 +2010,55 @@ initScene = function() {
         
     var planeGeo = new THREE.PlaneGeometry( 1024, 1024, 64,64 );
 
+    var tiledVertexShader = 
+    "uniform sampler2D heightMap;"+
+    "uniform float heightScale;"+
 
+    "varying float vAmount;"+
+    "varying vec2 vUV;"+
 
+    "void main()"+
+    "{"+
+        "vUV = uv;"+
+        "vec4 tx = texture2D( heightMap, vUV);"+
+        "vAmount = tx.g;"+
+        "vec3 newPosition = position + normal  * vAmount * heightScale;"+
+        
+        "gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );"+
+    "}";
+    var tiledFragmentShader = [
+    "uniform sampler2D oceanTexture;",
+    "uniform sampler2D sandyTexture;",
+    "uniform sampler2D grassTexture;",
+    "uniform sampler2D rockyTexture;",
+    "uniform sampler2D snowyTexture;",
+    "uniform sampler2D heightMap;",
+
+    "varying vec2 vUV;",
+            THREE.ShaderChunk[ "fog_pars_fragment" ],
+
+    "varying float vAmount;",
+
+    "void main()", 
+    "{",
+        "vec4 water = (smoothstep(0.01, 0.25, vAmount) - smoothstep(0.24, 0.26, vAmount)) * texture2D( oceanTexture, vUV * 10.0 );",
+        "vec4 sandy = (smoothstep(0.24, 0.27, vAmount) - smoothstep(0.28, 0.31, vAmount)) * texture2D( sandyTexture, vUV * 10.0 );",
+        "vec4 grass = (smoothstep(0.28, 0.32, vAmount) - smoothstep(0.35, 0.40, vAmount)) * texture2D( grassTexture, vUV * 20.0 );",
+        "vec4 rocky = (smoothstep(0.30, 0.50, vAmount) - smoothstep(0.40, 0.70, vAmount)) * texture2D( rockyTexture, vUV * 20.0 );",
+        "vec4 snowy = (smoothstep(0.50, 0.65, vAmount))                                   * texture2D( snowyTexture, vUV * 10.0 );",
+        "vec4 tx = texture2D( heightMap, vUV);",  
+        "gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0) + water + sandy + grass + rocky + snowy; //, 1.0);",
+
+            THREE.ShaderChunk[ "fog_fragment" ],
+    "}"
+    ].join("\n");
     var i =0;
     for (var i=0;i<1;i++) {
         for (var j=0;j<1;j++){
 
-var imgPath = 'http://localhost:8080/orpgl-mapgen/images/tile_'+i+'_'+j+'.bmp' ;
+            var imgPath = 'http://localhost:8080/orpgl-mapgen/images/tile_'+i+'_'+j+'.bmp' ;
 
-imgTilePaths[i*j] = imgPath;
+            imgTilePaths[i*j] = imgPath;
         
             var texture = new THREE.ImageUtils.loadTexture(imgPath);
             
@@ -2030,13 +2070,17 @@ imgTilePaths[i*j] = imgPath;
             grassTexture:   { type: "t", value: grassTexture },
             rockyTexture:   { type: "t", value: rockyTexture },
             snowyTexture:   { type: "t", value: snowyTexture },
+            fogColor:    { type: "c", value: 0xB5D8FF },
+            fogNear:     { type: "f", value: 1 },
+            fogFar:      { type: "f", value: 100 },
             };
 
             var material = new THREE.ShaderMaterial( 
             {
                 uniforms: uniforms,
-                vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
-                fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+                vertexShader:   tiledVertexShader,
+                fragmentShader: tiledFragmentShader,
+                fog:true
                 // side: THREE.DoubleSide
             }   );
 
