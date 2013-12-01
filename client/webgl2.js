@@ -1156,7 +1156,7 @@ function loadNature() {
     var obj= null;
     loader.load( 'palm/lowpolytree5.obj', function ( object ) {
 
-         for(var i = 0; i < 100; i++) {
+         for(var i = 0; i < 20; i++) {
 
             var objt = object.clone();
             objt.traverse( function ( child ) {
@@ -1174,7 +1174,7 @@ objt.position.set(x, hh , z);
             var xz = THREE.Math.randFloat(3, 4)
             objt.scale.set(xz,3,xz);
             console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
-if (hh>0)
+if (hh>-30 && hh <5)
             scene.add(objt);
 
 /*            var x = naturePos[0][i] * 4;
@@ -1201,7 +1201,7 @@ if (hh>0)
     var obj= null;
     loader.load( 'tree1/tree4-obj.obj', function ( object ) {
 
-         for(var i = 101; i < 200; i++) {
+         for(var i = 21; i < 40; i++) {
 
             var objt = object.clone();
             objt.traverse( function ( child ) {
@@ -1219,9 +1219,9 @@ if (hh>0)
 objt.position.set(x, hh , z);
             objt.rotation.y = THREE.Math.randFloat(-0.25, 0.25);
             var xz = THREE.Math.randFloat(3, 4)
-            objt.scale.set(xz,3,xz);
+            objt.scale.set(xz*2,7,xz*2);
             console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
-if (hh>0)
+if (hh>5)
             scene.add(objt);
 
 /*
@@ -1940,20 +1940,20 @@ initScene = function() {
         baseTexture : THREE.ImageUtils.loadTexture("water.png"),
         baseSpeed   : 0.01,
         noiseTexture: noiseTexture,
-        noiseScale  : 0.02,
+        noiseScale  : 0.0002,
         alpha       : 0.8,
         time        : 0.0,
     });
 
     var SeaMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(800, 800, 100, 100),
+        new THREE.PlaneGeometry(80000, 80000, 100, 100),
         Sea.material
     );
     Sea.material.side = THREE.DoubleSide;
     SeaMesh.add(Sea);
 
     SeaMesh.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
-    SeaMesh.position.set(0, 0, 0);
+    SeaMesh.position.set(0, -28, 0);
     scene.add(SeaMesh);
 
 
@@ -2052,13 +2052,18 @@ initScene = function() {
             THREE.ShaderChunk[ "fog_fragment" ],
     "}"
     ].join("\n");
-    var i =0;
+    var i =0;    var j =0;
+    alert("eeeeee");
     for (var i=0;i<1;i++) {
-        for (var j=0;j<1;j++){
+        for (var j=0;j<10;j++){
 
             var imgPath = 'http://localhost:8080/orpgl-mapgen/images/tile_'+i+'_'+j+'.bmp' ;
-
-            imgTilePaths[i*j] = imgPath;
+    //alert("filling idx "+(i*j));
+var ii = i;
+var jj =j;
+    if (i==0&&j!=0)ii=1;
+    if (j==0&&i!=0)jj=1;
+            imgTilePaths[ii*jj] = imgPath;
         
             var texture = new THREE.ImageUtils.loadTexture(imgPath);
             
@@ -2114,12 +2119,13 @@ initScene = function() {
 
 function getHeight(object, nolog){
 
-    if (currentTile == -1) {
+    if (currentTile == -1) {console.log("WWWWWWWW");
         var ctx = document.getElementById('myCanvas').getContext('2d');
         var img = new Image();
         img.src = imgTilePaths[0];
         img.onload = function(){
             ctx.drawImage(img,0,0,512,512);
+            
         }
         currentTile = 0;
     }
@@ -2135,8 +2141,23 @@ function getHeight(object, nolog){
     var h=0;
      if (x>0 && x<=512 && z>0 && z<=512) 
         h=Math.floor(height/1.2)-100;
-    if (nolog != false)
-    rendererStats.update(renderer,Math.floor(object.position.x),Math.floor(object.position.z),x,z,h);
+    if (nolog != false) {
+      /*  var tileX = Math.floor((object.position.x+512)/1024);
+        var tileZ = Math.floor((object.position.z+512)/1024);
+        var idx = tileX*tileZ; 
+        if (currentTile !=idx) {
+            alert('chg');
+        var ctx = document.getElementById('myCanvas').getContext('2d');
+        var img = new Image();
+        img.src = imgTilePaths[idx];
+        img.onload = function(){
+            ctx.drawImage(img,0,0,512,512);
+        }
+        currentTile = idx;
+        }*/
+ //       console.log(Math.floor((object.position.x+512)/1024)+'x'+Math.floor((object.position.z+512)/1024))
+        rendererStats.update(renderer,Math.floor(object.position.x),Math.floor(object.position.z),x,z,h);
+    }
         return h;
 
 }
