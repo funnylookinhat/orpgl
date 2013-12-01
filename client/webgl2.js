@@ -3,7 +3,7 @@
 Physijs.scripts.worker = 'physijs_worker.js';
 Physijs.scripts.ammo = 'ammo.js';
 
-var frustum, clock, initScene, render, _boxes = [], spawnBox,
+var imgTilePaths,currentTile,frustum, clock, initScene, render, _boxes = [], spawnBox,
     renderer, render_stats, physics_stats, scene, ground_material, ground, light, camera, customUniforms2;
 var composer, dpr, effectFXAA, renderScene;
 var t = 0;
@@ -749,14 +749,17 @@ THREE.PointerLockControls = function(camera) {
         yawObject.translateX(velocity.x);
         yawObject.translateZ(velocity.z);
         nh = getH(yawObject.position.x / divisor, -yawObject.position.z / divisor) + 0.5;
-        if(yawObject.position.y < nh && (yawObject.position.y - nh) < -.01) {
+        //console.log(nh+' '+getHeight(yawObject));
+        nh = getHeight(yawObject,true);
+        yawObject.position.y =nh;
+/*        if(yawObject.position.y < nh && (yawObject.position.y - nh) < -.01) {
             yawObject.translateY(.2 + velocity.y)
         }
         velocity.y = 0;
         if(yawObject.position.y > nh && (yawObject.position.y - nh) > .01) {
             yawObject.translateY(-.2);
         }
-
+*/
         //console.log((nh - yawObject.position.y));
 
         checkPos(yawObject);
@@ -1161,8 +1164,20 @@ function loadNature() {
                     child.material=new THREE.MeshBasicMaterial({ map: THREE.ImageUtils.loadTexture('palm/shu1.png'), transparent: true, alphaTest: 0.5,side: THREE.DoubleSide});
                 }
             } );
-       
-            var x = naturePos[0][i] * 4;
+                   var x = naturePos[0][i] * 4;
+            var z = naturePos[1][i] * 4;
+            objt.position.set(x, 0 , z);
+
+       var hh = getHeight(objt,false)-10;
+objt.position.set(x, hh , z);
+            objt.rotation.y = THREE.Math.randFloat(-0.25, 0.25);
+            var xz = THREE.Math.randFloat(3, 4)
+            objt.scale.set(xz,3,xz);
+            console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
+if (hh>0)
+            scene.add(objt);
+
+/*            var x = naturePos[0][i] * 4;
             var z = naturePos[1][i] * 4;
             if(!(getH(x / divisor, -z / divisor) < 0)) {
                
@@ -1173,7 +1188,7 @@ function loadNature() {
             console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
             scene.add(objt);
 
-            }
+            }*/
             //       _trees.push(object);
             //  var android = object;
 
@@ -1195,6 +1210,21 @@ function loadNature() {
                 }
             } );
        
+
+            var x = naturePos[0][i] * 4;
+            var z = naturePos[1][i] * 4;
+            objt.position.set(x, 0 , z);
+
+       var hh = getHeight(objt,false)-10;
+objt.position.set(x, hh , z);
+            objt.rotation.y = THREE.Math.randFloat(-0.25, 0.25);
+            var xz = THREE.Math.randFloat(3, 4)
+            objt.scale.set(xz,3,xz);
+            console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
+if (hh>0)
+            scene.add(objt);
+
+/*
             var x = naturePos[0][i] * 4;
             var z = naturePos[1][i] * 4;
             if(!(getH(x / divisor, -z / divisor) < 0)) {
@@ -1206,7 +1236,7 @@ function loadNature() {
             console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
             scene.add(objt);
 
-            }
+            }*/
             //       _trees.push(object);
             //  var android = object;
 
@@ -1525,7 +1555,10 @@ render = function() {
 //    Sun.position.y = (Math.sin( clock.elapsedTime /50) * 390)+5;
     Sunlight.position.y = (Math.sin((clock.elapsedTime + 200 ) / 200) * 390);
     lensFlare.position.y = (Math.sin((clock.elapsedTime + 200 ) / 200) * 390);
-    rendererStats.update(renderer);
+
+    var x = Math.floor(yawObject.position.x/2+256);
+    var z = Math.floor(yawObject.position.z/2+256);
+
     renderer.render(scene, camera);
 
     time = Date.now();
@@ -1683,7 +1716,7 @@ initScene = function() {
         35,
         window.innerWidth / window.innerHeight,
         1,
-        800
+        2048
     );
     camera.position.set(60, 50, 60);
     camera.lookAt(scene.position);
@@ -1736,7 +1769,7 @@ initScene = function() {
 
     scene.fog.color.copy(skyUniforms.bottomColor.value);
 
-    var skyGeo = new THREE.SphereGeometry(400, 32, 15);
+    var skyGeo = new THREE.SphereGeometry(1024, 32, 15);
     var skyMat = new THREE.ShaderMaterial({ vertexShader: vertexShader, fragmentShader: fragmentShader, uniforms: skyUniforms, side: THREE.BackSide });
 
     var sky = new THREE.Mesh(skyGeo, skyMat);
@@ -1833,7 +1866,7 @@ initScene = function() {
     //terrain_ground.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
     //terrain_ground.receiveShadow = true;
 
-    scene.add(ground);
+    //scene.add(ground);
 
     var cube_geometry = new THREE.CubeGeometry(3, 3, 3);
     var cube_mesh = new THREE.Mesh(cube_geometry);
@@ -1888,11 +1921,13 @@ initScene = function() {
 
     furMesh.position.x = wa[0] + 2.5;
     furMesh.position.z = wa[1] + 2.5;
-    furMesh.position.y = getH(furMesh.position.x / divisor, furMesh.position.z / divisor) + 5;
-    scene.add(furMesh);
+
+       var hh = getHeight(furMesh,false)-10;
+    furMesh.position.y = hh;// getH(furMesh.position.x / divisor, furMesh.position.z / divisor) + 5;
+    if (hh>0)scene.add(furMesh);
 
     //NATURE
-    loadNature();
+    setTimeout("loadNature();",3000);
 
     var noiseTexture = new THREE.ImageUtils.loadTexture('cloud.png');
     noiseTexture.wrapS = noiseTexture.wrapT = THREE.RepeatWrapping;
@@ -1948,6 +1983,78 @@ initScene = function() {
     }
 
 
+
+
+
+    ///////
+
+    var heightScale   = 200.0;
+    currentTile = -1;
+    imgTilePaths= new Array();
+
+    var oceanTexture = new THREE.ImageUtils.loadTexture( '/orpgl-mapgen/images/dirt-512.jpg' );
+    oceanTexture.wrapS = oceanTexture.wrapT = THREE.RepeatWrapping; 
+    
+    var sandyTexture = new THREE.ImageUtils.loadTexture( '/orpgl-mapgen/images/sand-512.jpg' );
+    sandyTexture.wrapS = sandyTexture.wrapT = THREE.RepeatWrapping; 
+    
+    var grassTexture = new THREE.ImageUtils.loadTexture( '/orpgl-mapgen/images/grass-512.jpg' );
+    grassTexture.wrapS = grassTexture.wrapT = THREE.RepeatWrapping; 
+    
+    var rockyTexture = new THREE.ImageUtils.loadTexture( '/orpgl-mapgen/images/rock-512.jpg' );
+    rockyTexture.wrapS = rockyTexture.wrapT = THREE.RepeatWrapping; 
+    
+    var snowyTexture = new THREE.ImageUtils.loadTexture( '/orpgl-mapgen/images/snow-512.jpg' );
+    snowyTexture.wrapS = snowyTexture.wrapT = THREE.RepeatWrapping; 
+
+        
+    var planeGeo = new THREE.PlaneGeometry( 1024, 1024, 64,64 );
+
+
+
+    var i =0;
+    for (var i=0;i<1;i++) {
+        for (var j=0;j<1;j++){
+
+var imgPath = 'http://localhost:8080/orpgl-mapgen/images/tile_'+i+'_'+j+'.bmp' ;
+
+imgTilePaths[i*j] = imgPath;
+        
+            var texture = new THREE.ImageUtils.loadTexture(imgPath);
+            
+            var uniforms = {
+            heightMap:  { type: "t", value: texture },
+            heightScale:        { type: "f", value: heightScale },
+            oceanTexture:   { type: "t", value: oceanTexture },
+            sandyTexture:   { type: "t", value: sandyTexture },
+            grassTexture:   { type: "t", value: grassTexture },
+            rockyTexture:   { type: "t", value: rockyTexture },
+            snowyTexture:   { type: "t", value: snowyTexture },
+            };
+
+            var material = new THREE.ShaderMaterial( 
+            {
+                uniforms: uniforms,
+                vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
+                fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+                // side: THREE.DoubleSide
+            }   );
+
+            var plane = new THREE.Mesh( planeGeo, material );
+            plane.rotation.x = -Math.PI / 2;
+            plane.position.y = -100;
+            plane.position.z = -1022*j;
+            plane.position.x = 1022*i;
+
+            scene.add( plane );
+            
+        }
+    }
+
+
+    ///////
+
+
     renderer.setClearColor(scene.fog.color, 1);
 
     renderer.gammaInput = true;
@@ -1959,6 +2066,36 @@ initScene = function() {
     scene.simulate();
     animate();
 };
+
+
+function getHeight(object, nolog){
+
+    if (currentTile == -1) {
+        var ctx = document.getElementById('myCanvas').getContext('2d');
+        var img = new Image();
+        img.src = imgTilePaths[0];
+        img.onload = function(){
+            ctx.drawImage(img,0,0,512,512);
+        }
+        currentTile = 0;
+    }
+    var ctx =document.getElementById('myCanvas').getContext('2d');
+    var imageData = ctx.getImageData(0, 0, 512,512);
+    var x =Math.floor(((object.position.x)/2))+256;
+    var z =Math.floor(((object.position.z)/2))+256;
+
+
+    var index = 4 * (z * 512 + x);
+    var height = imageData.data[index];
+
+    var h=0;
+     if (x>0 && x<=512 && z>0 && z<=512) 
+        h=Math.floor(height/1.2)-100;
+    if (nolog != false)
+    rendererStats.update(renderer,Math.floor(object.position.x),Math.floor(object.position.z),x,z,h);
+        return h;
+
+}
 
 initScene();
 //composer.render(0.05);

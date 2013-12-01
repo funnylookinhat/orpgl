@@ -305,6 +305,8 @@ loaddir('violet');
 loaddir('palm');
 loaddir('tree1');
 
+loaddir('orpgl-mapgen');
+
 createnature();
 
 fu.get("/", fu.staticHandler("index.html"));
