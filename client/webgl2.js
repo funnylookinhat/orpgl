@@ -23,7 +23,7 @@ var sprite3 = null;
 var sprite4 = null;
 var sprite5 = null;
 var sprite6 = null;
-var myPos = { 'x': 0, 'y': 1, 'z': 0};
+var myPos = { 'x': 0, 'y': 2, 'z': 0};
 var sphere = null;
 var amplitude = 1;
 var previousRender;
@@ -1156,7 +1156,7 @@ function loadNature() {
     var obj= null;
     loader.load( 'palm/lowpolytree5.obj', function ( object ) {
 
-         for(var i = 0; i < 20; i++) {
+         for(var i = 0; i < 500; i++) {
 
             var objt = object.clone();
             objt.traverse( function ( child ) {
@@ -1174,7 +1174,7 @@ objt.position.set(x, hh , z);
             var xz = THREE.Math.randFloat(3, 4)
             objt.scale.set(xz,3,xz);
     //        console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
-if (hh>-30 && hh <5)
+if (hh>-38 && hh <30)
             scene.add(objt);
 
 /*            var x = naturePos[0][i] * 4;
@@ -1195,7 +1195,7 @@ if (hh>-30 && hh <5)
         }
     } );
 
-
+/*
     // model
     var loader = new THREE.OBJLoader( );
     var obj= null;
@@ -1224,24 +1224,9 @@ objt.position.set(x, hh , z);
 if (hh>5)
             scene.add(objt);
 
-/*
-            var x = naturePos[0][i] * 4;
-            var z = naturePos[1][i] * 4;
-            if(!(getH(x / divisor, -z / divisor) < 0)) {
-               
-            objt.position.set(x, getH(x / divisor, -z / divisor) -5, z);
-            objt.rotation.y = THREE.Math.randFloat(-0.25, 0.25);
-            var xz = THREE.Math.randFloat(1, 1.5)
-            objt.scale.set(xz,2,xz);
-            console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
-            scene.add(objt);
-
-            }*/
-            //       _trees.push(object);
-            //  var android = object;
 
         }
-    } );
+    } );*/
 /*
     // model
     var loader = new THREE.OBJLoader( );
@@ -1286,8 +1271,6 @@ function onWindowResize(event) {
 }
 
 function animate() {
-
-    Sea.render();
 
     render();
 }
@@ -1931,26 +1914,26 @@ initScene = function() {
 
 
     Sea = new THREE.FlatMirror(renderer, camera, {
-        clipBias    : 3,
+        clipBias    : 1,
         textureWidth: 800, textureHeight: 600,
         color       : 0x333366,
         baseTexture : THREE.ImageUtils.loadTexture("water.png"),
         baseSpeed   : 0.01,
         noiseTexture: noiseTexture,
-        noiseScale  : 0.0002,
-        alpha       : 0.8,
+        noiseScale  : 0.2,
+        alpha       : 0.4,
         time        : 0.0,
     });
 
     var SeaMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(80000, 80000, 100, 100),
+        new THREE.PlaneGeometry(4000, 4000, 100, 100),
         Sea.material
     );
     Sea.material.side = THREE.DoubleSide;
     SeaMesh.add(Sea);
 
     SeaMesh.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
-    SeaMesh.position.set(0, -38, 0);
+    SeaMesh.position.set(0, -48, 0);
     scene.add(SeaMesh);
 
 
@@ -2159,4 +2142,7 @@ function getHeight(object, nolog){
 }
 
 initScene();
+
+    yawObject.position.x=400;
+    yawObject.position.z=-400;
 //composer.render(0.05);
