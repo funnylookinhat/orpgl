@@ -1555,10 +1555,7 @@ render = function() {
 //    Sun.position.y = (Math.sin( clock.elapsedTime /50) * 390)+5;
     Sunlight.position.y = (Math.sin((clock.elapsedTime + 200 ) / 200) * 390);
     lensFlare.position.y = (Math.sin((clock.elapsedTime + 200 ) / 200) * 390);
-
-    var x = Math.floor(yawObject.position.x/2+256);
-    var z = Math.floor(yawObject.position.z/2+256);
-
+sky.position = yawObject.position;
     renderer.render(scene, camera);
 
     time = Date.now();
@@ -1674,7 +1671,7 @@ function setUniforms() {
         fogFar     : { type: "f", value: scene.fog.far }, fogDensity: { type: "f", value: 100 }
     };
 }
-
+var sky;
 initScene = function() {
     rendererStats = new THREEx.RendererStats();
 
@@ -1724,7 +1721,7 @@ initScene = function() {
     frustum = new THREE.Frustum();
     
     //FOG
-    scene.fog = new THREE.Fog(0xB5D8FF, 1, 500);
+    scene.fog = new THREE.Fog(0x0077ff, 1, 1500);
     
     // LIGHTS
 
@@ -1769,10 +1766,10 @@ initScene = function() {
 
     scene.fog.color.copy(skyUniforms.bottomColor.value);
 
-    var skyGeo = new THREE.SphereGeometry(1024, 32, 15);
+    var skyGeo = new THREE.SphereGeometry(2048, 32, 15);
     var skyMat = new THREE.ShaderMaterial({ vertexShader: vertexShader, fragmentShader: fragmentShader, uniforms: skyUniforms, side: THREE.BackSide });
 
-    var sky = new THREE.Mesh(skyGeo, skyMat);
+    sky = new THREE.Mesh(skyGeo, skyMat);
     scene.add(sky);
     ///LENS FLARE / SUN
     
@@ -1953,7 +1950,7 @@ initScene = function() {
     SeaMesh.add(Sea);
 
     SeaMesh.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
-    SeaMesh.position.set(0, -28, 0);
+    SeaMesh.position.set(0, -38, 0);
     scene.add(SeaMesh);
 
 
@@ -2071,7 +2068,7 @@ var k = 0;
             grassTexture:   { type: "t", value: grassTexture },
             rockyTexture:   { type: "t", value: rockyTexture },
             snowyTexture:   { type: "t", value: snowyTexture },
-            fogColor:    { type: "c", value: 0xB5D8FF },
+            fogColor:    { type: "c", value: 0x0077ff },
             fogNear:     { type: "f", value: 1 },
             fogFar:      { type: "f", value: 100 },
             };
