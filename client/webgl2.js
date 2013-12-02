@@ -1170,9 +1170,9 @@ function loadNature() {
 
        var hh = getHeight(objt,false)-10;
 objt.position.set(x, hh , z);
-            objt.rotation.y = THREE.Math.randFloat(-0.25, 0.25);
-            var xz = THREE.Math.randFloat(3, 4)
-            objt.scale.set(xz,3,xz);
+            objt.rotation.y = THREE.Math.randFloat(-0.5, 1.5);
+            var xz = THREE.Math.randFloat(5, 6)
+            objt.scale.set(xz,5,xz);
     //        console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
 if (hh>-38 && hh <30)
             scene.add(objt);
