@@ -1173,7 +1173,7 @@ objt.position.set(x, hh , z);
             objt.rotation.y = THREE.Math.randFloat(-0.25, 0.25);
             var xz = THREE.Math.randFloat(3, 4)
             objt.scale.set(xz,3,xz);
-            console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
+    //        console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
 if (hh>-30 && hh <5)
             scene.add(objt);
 
@@ -1220,7 +1220,7 @@ objt.position.set(x, hh , z);
             objt.rotation.y = THREE.Math.randFloat(-0.25, 0.25);
             var xz = THREE.Math.randFloat(3, 4)
             objt.scale.set(xz*2,7,xz*2);
-            console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
+   //         console.log('loading tree at pos '+objt.position.x+' '+objt.position.y+' '+objt.position.z);
 if (hh>5)
             scene.add(objt);
 
@@ -2054,16 +2054,12 @@ initScene = function() {
     ].join("\n");
     var i =0;    var j =0;
 //    alert("eeeeee");
-    for (var i=0;i<1;i++) {
+var k = 0;
+    for (var i=0;i<10;i++) {
         for (var j=0;j<10;j++){
 
             var imgPath = 'http://localhost:8080/orpgl-mapgen/images/tile_'+i+'_'+j+'.bmp' ;
-    //alert("filling idx "+(i*j));
-var ii = i;
-var jj =j;
-    if (i==0&&j!=0)ii=1;
-    if (j==0&&i!=0)jj=1;
-            imgTilePaths[ii*jj] = imgPath;
+            imgTilePaths[k++] = imgPath;
         
             var texture = new THREE.ImageUtils.loadTexture(imgPath);
             
@@ -2094,6 +2090,7 @@ var jj =j;
             plane.position.y = -100;
             plane.position.z = -1018*j;
             plane.position.x = 1018*i;
+    console.log("filling idx "+(i*j)+" "+imgPath +" at : "+ plane.position.x+" "+plane.position.y +" "+plane.position.z);
 
             scene.add( plane );
             
@@ -2119,7 +2116,7 @@ var jj =j;
 
 function getHeight(object, nolog){
 
-    if (currentTile == -1) {console.log("WWWWWWWW");
+    if (currentTile == -1) {
         var ctx = document.getElementById('myCanvas').getContext('2d');
         var img = new Image();
         img.src = imgTilePaths[0];
@@ -2131,8 +2128,9 @@ function getHeight(object, nolog){
     }
     var ctx =document.getElementById('myCanvas').getContext('2d');
     var imageData = ctx.getImageData(0, 0, 512,512);
-    var x =512-Math.floor((-(object.position.x-512)%1024)/2);
-    var z =512-Math.floor((-(object.position.z-512)%1024)/2);
+    var x =(512-Math.floor((-(object.position.x-512)%1024)/2))%512;
+    object.position.x
+    var z =(512-Math.floor((-(object.position.z-512)%1024)/2))%512;
 
 
     var index = 4 * (z * 512 + x);
@@ -2142,14 +2140,15 @@ function getHeight(object, nolog){
      if (x>0 && x<=512 && z>0 && z<=512) 
         h=Math.floor(height/1.2)-100;
     if (nolog != false) {
-        var tileX = Math.floor(-(object.position.x-512)/1024);
-        var tileZ = Math.floor(-(object.position.z-512)/1024);
+        var tileX = -Math.floor(-(object.position.x-512)/1024)%10;
+        var tileZ = Math.floor(-(object.position.z-512)/1024)%10;
         var idx = tileZ + tileX*10; 
         if (currentTile !=idx) {
             //alert('chg');
         var ctx = document.getElementById('myCanvas').getContext('2d');
         var img = new Image();
         img.src = imgTilePaths[idx];
+        console.log("heightmap:"+img.src)
         img.onload = function(){
             ctx.drawImage(img,0,0,512,512);
         }
