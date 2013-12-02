@@ -2053,7 +2053,7 @@ initScene = function() {
     "}"
     ].join("\n");
     var i =0;    var j =0;
-    alert("eeeeee");
+//    alert("eeeeee");
     for (var i=0;i<1;i++) {
         for (var j=0;j<10;j++){
 
@@ -2092,8 +2092,8 @@ var jj =j;
             var plane = new THREE.Mesh( planeGeo, material );
             plane.rotation.x = -Math.PI / 2;
             plane.position.y = -100;
-            plane.position.z = -1022*j;
-            plane.position.x = 1022*i;
+            plane.position.z = -1018*j;
+            plane.position.x = 1018*i;
 
             scene.add( plane );
             
@@ -2131,8 +2131,8 @@ function getHeight(object, nolog){
     }
     var ctx =document.getElementById('myCanvas').getContext('2d');
     var imageData = ctx.getImageData(0, 0, 512,512);
-    var x =Math.floor(((object.position.x)/2))+256;
-    var z =Math.floor(((object.position.z)/2))+256;
+    var x =512-Math.floor((-(object.position.x-512)%1024)/2);
+    var z =512-Math.floor((-(object.position.z-512)%1024)/2);
 
 
     var index = 4 * (z * 512 + x);
@@ -2142,11 +2142,11 @@ function getHeight(object, nolog){
      if (x>0 && x<=512 && z>0 && z<=512) 
         h=Math.floor(height/1.2)-100;
     if (nolog != false) {
-      /*  var tileX = Math.floor((object.position.x+512)/1024);
-        var tileZ = Math.floor((object.position.z+512)/1024);
-        var idx = tileX*tileZ; 
+        var tileX = Math.floor(-(object.position.x-512)/1024);
+        var tileZ = Math.floor(-(object.position.z-512)/1024);
+        var idx = tileZ + tileX*10; 
         if (currentTile !=idx) {
-            alert('chg');
+            //alert('chg');
         var ctx = document.getElementById('myCanvas').getContext('2d');
         var img = new Image();
         img.src = imgTilePaths[idx];
@@ -2154,9 +2154,9 @@ function getHeight(object, nolog){
             ctx.drawImage(img,0,0,512,512);
         }
         currentTile = idx;
-        }*/
+        }
  //       console.log(Math.floor((object.position.x+512)/1024)+'x'+Math.floor((object.position.z+512)/1024))
-        rendererStats.update(renderer,Math.floor(object.position.x),Math.floor(object.position.z),x,z,h);
+        rendererStats.update(renderer,Math.floor(object.position.x),Math.floor(object.position.z),x,z,h, currentTile);
     }
         return h;
 
